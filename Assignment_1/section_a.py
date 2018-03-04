@@ -19,9 +19,9 @@ Q8	2700	1350	1950	$1013
 parsed = [ i.split() for i in table.strip().split('\n') ]
 
 Quarter             = [     i[0]      for i in parsed ]
-BrisbaneDemand     = [ int(i[1])     for i in parsed ]
-MelbourneDemand    = [ int(i[2])     for i in parsed ]
-AdelaideDemand     = [ int(i[3])     for i in parsed ]
+BrisbaneDemand      = [ int(i[1])     for i in parsed ]
+MelbourneDemand     = [ int(i[2])     for i in parsed ]
+AdelaideDemand      = [ int(i[3])     for i in parsed ]
 Cost                = [ int(i[4][1:]) for i in parsed ]
 # slicing `1:` to remove the dollar sign
 
@@ -53,12 +53,15 @@ for c in C:
         # city in each quarter
         X[(c, q)] = m.addVar(vtype=GRB.INTEGER)
 
+# here be dragons
 def number_in_storage(c, q):
     if q == 0: # AKA "Q1" 
         return InitialSupply[c] - Demand[c][q]
     else:
-        new_supply = X[(c, q)]
-        return number_in_storage(c, q - 1) + new_supply - Demand[c][q]
+        # Need to think long and hard over whether I've done this right
+        # I originally didn't have any indexes which produced more interesting results
+        new_supply = X[(c, q - 1)]
+        return number_in_storage(c, q - 1) + new_supply - Demand[c][q - 1]
 
 cost_function = quicksum(
     number_in_storage(c, q) * STORAGE_COST_PER_QUARTER
@@ -74,6 +77,12 @@ for q in Q:
     # "...we use a single ship for imports ... with a capacity of 10 000 barrels"
     m.addConstr(quicksum(X[(c, q)] for c in C) <= SHIP_CAPACITY)
 
+for c in C:
+    for q in Q:
+        # We must meet demand
+        m.addConstr(X[(c, q)] + number_in_storage(c, q) - Demand[c][q] >= 0)
+        #                           ^ here be dragons
+
 m.optimize()
 
 ###############################################################################
@@ -82,3 +91,6 @@ for q in Q:
     print(Quarter[q], *[X[(c, q)].x for c in C])
 
 print("Optimal cost:", m.objVal)
+
+###############################################################################
+
