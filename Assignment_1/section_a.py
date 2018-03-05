@@ -35,8 +35,8 @@ BRISBANE_BARRELS = 3200
 MELBOURNE_BARRELS = 4000
 ADELAIDE_BARRELS = 3800
 
-Demand = [ BrisbaneDemand, MelbourneDemand, AdelaideDemand ]
-InitialSupply = [ BRISBANE_BARRELS, MELBOURNE_BARRELS, ADELAIDE_BARRELS ]
+Demand =        [ BrisbaneDemand,   MelbourneDemand,    AdelaideDemand ]
+InitialSupply = [ BRISBANE_BARRELS, MELBOURNE_BARRELS,  ADELAIDE_BARRELS ]
 
 SHIP_CAPACITY = 10000
 
@@ -53,18 +53,16 @@ for c in C:
         # city in each quarter
         X[(c, q)] = m.addVar(vtype=GRB.INTEGER)
 
-# here be dragons
-def number_in_storage(c, q):
+def barrels_getting_stored(c, q):
+    new_supply = X[(c, q)]
+
     if q == 0: # AKA "Q1" 
-        return InitialSupply[c] - Demand[c][q]
+        return InitialSupply[c] + new_supply - Demand[c][q]
     else:
-        # Need to think long and hard over whether I've done this right
-        # I originally didn't have any indexes which produced more interesting results
-        new_supply = X[(c, q - 1)]
-        return number_in_storage(c, q - 1) + new_supply - Demand[c][q - 1]
+        return barrels_getting_stored(c, q - 1) + new_supply - Demand[c][q]
 
 cost_function = quicksum(
-    number_in_storage(c, q) * STORAGE_COST_PER_QUARTER
+    barrels_getting_stored(c, q) * STORAGE_COST_PER_QUARTER
     +
     X[(c, q)] * Cost[c]
     for c in C for q in Q
@@ -79,18 +77,23 @@ for q in Q:
 
 for c in C:
     for q in Q:
-        # We must meet demand
-        m.addConstr(X[(c, q)] + number_in_storage(c, q) - Demand[c][q] >= 0)
-        #                           ^ here be dragons
+        # kinda a nifty little hack here, 
+        # this ensures that demand is being met each quarter
+        # (look at what barrels_getting_stored expresses)
+        m.addConstr(barrels_getting_stored(c, q) >= 0)
 
 m.optimize()
 
 ###############################################################################
 
-for q in Q:
-    print(Quarter[q], *[X[(c, q)].x for c in C])
+columns = "{:>12} {:>12} {:>12} {:>12}"
 
-print("Optimal cost:", m.objVal)
+print(columns.format("Quarter", *Cities))
+
+for q in Q:
+    print(columns.format(Quarter[q], *[X[(c, q)].x for c in C]))
+
+print("Optimal cost: ${}".format(m.objVal))
 
 ###############################################################################
 
