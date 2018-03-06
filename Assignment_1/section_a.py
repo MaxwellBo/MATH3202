@@ -88,12 +88,15 @@ m.optimize()
 
 columns = "{:>12} {:>12} {:>12} {:>12}"
 
+
+print()
 print(columns.format("Quarter", *Cities))
 
 for q in Q:
     print(columns.format(Quarter[q], *[X[(c, q)].x for c in C]))
 
-print("Optimal cost: ${}".format(m.objVal))
+print()
+print("Optimal cost: ${:,}".format(m.objVal))
 
 ###############################################################################
 
