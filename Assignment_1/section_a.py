@@ -1,8 +1,16 @@
 __author__  = "Mawell Bo, Chantel Morris"
 
-"""Assignment 1 – Linear Programming - Section A – Report to your boss"""
+"""Assignment 1 - Linear Programming - Section A"""
 
 from gurobipy import *
+
+SHIP_CAPACITY = 10000
+
+STORAGE_COST_PER_QUARTER = 25
+
+BRISBANE_BARRELS = 3200
+MELBOURNE_BARRELS = 4000
+ADELAIDE_BARRELS = 3800
 
 # Quarter	Brisbane	Melbourne	Adelaide	Cost
 table = """
@@ -16,31 +24,30 @@ Q7	2600	2950	1850	$1011
 Q8	2700	1350	1950	$1013
 """
 
-parsed = [ i.split() for i in table.strip().split('\n') ]
+lines = [ i.split() for i in table.strip().split('\n') ]
 
-Quarter             = [     i[0]      for i in parsed ]
-BrisbaneDemand      = [ int(i[1])     for i in parsed ]
-MelbourneDemand     = [ int(i[2])     for i in parsed ]
-AdelaideDemand      = [ int(i[3])     for i in parsed ]
-Cost                = [ int(i[4][1:]) for i in parsed ]
-# slicing `1:` to remove the dollar sign
-
-assert(len(Quarter) == 8)
+########
+# SETS #
+########
+Quarter = [ i[0] for i in lines ]
 Q = range(len(Quarter))
 
 Cities = [ "Brisbane", "Melbourne", "Adelaide" ]
 C = range(len(Cities))
 
-BRISBANE_BARRELS = 3200
-MELBOURNE_BARRELS = 4000
-ADELAIDE_BARRELS = 3800
+########
+# DATA #
+########
 
-Demand =        [ BrisbaneDemand,   MelbourneDemand,    AdelaideDemand ]
 InitialSupply = [ BRISBANE_BARRELS, MELBOURNE_BARRELS,  ADELAIDE_BARRELS ]
 
-SHIP_CAPACITY = 10000
+BrisbaneDemand      = [ int(i[1])     for i in lines ]
+MelbourneDemand     = [ int(i[2])     for i in lines ]
+AdelaideDemand      = [ int(i[3])     for i in lines ]
+Demand =        [ BrisbaneDemand,   MelbourneDemand,    AdelaideDemand ]
 
-STORAGE_COST_PER_QUARTER = 25
+Cost                = [ int(i[4][1:]) for i in lines ]
+# slicing `1:` to remove the dollar sign
 
 ###############################################################################
 

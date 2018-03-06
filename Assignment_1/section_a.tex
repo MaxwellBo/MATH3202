@@ -1,0 +1,53 @@
+\documentclass[a4paper]{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\title{Assignment 1 - Linear Programming - Section A}
+\author{Maxwell Bo  \and Chantel Morris}
+
+\begin{document} 
+
+\maketitle
+
+\section*{Sets}
+
+$Q$ quarters\\
+$C$ cities\\
+
+\section*{Data}
+
+$i_c$ current number of barrels in city $c \in C$ \footnote{$i$ for initial}\\
+$d_{cq}$ predicted demand of barrels in $c \in C$ for quarter $q \in Q$\\
+$c_q$ predicted cost of dollars per barrel for quarter $q \in Q$\\
+
+\section*{Decision Variable}
+
+$x_{cq}$ number of barrels to deliver to city $c \in C$ in quarter $q \in Q$\\
+
+Minimize cost
+\[
+\sum_{c \in C\\ q \in Q} 25 \cdot stored(c, q)\, +\: x_{cq} c_c
+\]
+
+subject to
+
+\[
+\sum_{c \in C} x_{cq} \leq 10000 \quad \forall q \in Q
+\]
+
+
+\[
+stored(c,\, q) \geq 0 \quad \forall c \in C\ \forall q \in Q
+\]
+
+where
+
+\[
+stored(c,\, q) \triangleq \begin{cases}
+    \text{if }  q = 0 & = i_{c} \quad \qquad \qquad \quad +  x_{cq} - d_{cq}\\
+    \text{otherwise } & = stored(c,\, q - 1) + x_{cq} - d_{cq}\\
+\end{cases}
+\]
+
+\end{document}
