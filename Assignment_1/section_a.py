@@ -71,7 +71,7 @@ def barrels_getting_stored(c, q):
 cost_function = quicksum(
     barrels_getting_stored(c, q) * STORAGE_COST_PER_QUARTER
     +
-    X[(c, q)] * Cost[c]
+    X[(c, q)] * Cost[q]
     for c in C for q in Q
 )
 
