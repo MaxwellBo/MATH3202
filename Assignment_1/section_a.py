@@ -84,7 +84,7 @@ for q in Q:
 
 for c in C:
     for q in Q:
-        # kinda a nifty little hack here, 
+        # kinda a nifty little trick here;
         # this ensures that demand is being met each quarter
         # (look at what barrels_getting_stored expresses)
         m.addConstr(barrels_getting_stored(c, q) >= 0)

@@ -27,7 +27,7 @@ $x_{cq}$ number of barrels to deliver to city $c \in C$ in quarter $q \in Q$\\
 
 Minimize cost
 \[
-\sum_{c \in C\\ q \in Q} 25 \cdot stored(c, q)\, +\: x_{cq} c_c
+\sum_{c \in C\\ q \in Q} 25 \cdot stored(c,\, q)\, +\: x_{cq} c_q
 \]
 
 subject to
@@ -38,7 +38,7 @@ subject to
 
 
 \[
-stored(c,\, q) \geq 0\footnote{This ensures that demand is met every quarter} \quad \forall c \in C\ \forall q \in Q 
+stored(c,\, q) \geq 0 \quad \forall c \in C\ \forall q \in Q 
 \]
 
 where
@@ -46,7 +46,7 @@ where
 \[
 stored(c,\, q) \triangleq \begin{cases}
     \text{if }  q = 0 & = i_{c} \quad \qquad \qquad \quad +  x_{c0} - d_{c0}\\
-    \text{otherwise } & = stored(c,\, q - 1) + x_{cq} - d_{co}\\
+    \text{otherwise } & = stored(c,\, q - 1) + x_{cq} - d_{cq}\\
 \end{cases}
 \]
 
