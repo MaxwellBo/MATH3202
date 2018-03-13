@@ -62,7 +62,7 @@ for c in C:
         X[c, q] = m.addVar(vtype=GRB.INTEGER)
 
         # make a variable representing the number of barrels stored in each
-        # city in each quarter
+        # city at the end of each quarter
         S[c, q] = m.addVar(vtype=GRB.INTEGER)
 
 cost_function = quicksum(
