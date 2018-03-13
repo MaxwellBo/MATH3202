@@ -24,10 +24,11 @@ $c_q$ predicted cost of dollars per barrel for quarter $q \in Q$\\
 \section*{Decision Variables}
 
 $x_{cq}$ number of barrels to deliver to city $c \in C$ in quarter $q \in Q$\\
+$s_{cq}$ number of barrels to store in city $c \in C$ at the end of quarter $q \in Q$\\
 
 Minimize cost
 \[
-\sum_{c \in C\\ q \in Q} 25 \cdot stored(c,\, q)\, +\: x_{cq} c_q
+\sum_{c \in C\\ q \in Q} 25 s_{cq} +\: c_q x_{cq}
 \]
 
 subject to
@@ -36,18 +37,19 @@ subject to
 \sum_{c \in C} x_{cq} \leq 10000 \quad \forall q \in Q
 \]
 
-
 \[
-stored(c,\, q) \geq 0 \quad \forall c \in C\ \forall q \in Q 
-\]
-
-where
-
-\[
-stored(c,\, q) \triangleq \begin{cases}
-    \text{if }  q = 0 & = i_{c} \quad \qquad \qquad \quad +  x_{c0} - d_{c0}\\
-    \text{otherwise } & = stored(c,\, q - 1) + x_{cq} - d_{cq}\\
+\forall c \in C,\, \forall q \in Q \quad \begin{cases}
+    \text{if }  q = 0 & i_{c} \qquad \, +  x_{c0} - d_{c0} = s_{cq}\\
+    \text{otherwise } & s_{c(q - 1)} +  x_{cq} - d_{cq} = s_{cq}\\
 \end{cases}
 \]
+
+and optionally
+
+\[
+    S_{cl} \geq 3000 \quad \forall c \in C
+\]
+
+where $l$ is the last quarter. 
 
 \end{document}
