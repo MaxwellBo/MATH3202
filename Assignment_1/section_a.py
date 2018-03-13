@@ -53,70 +53,136 @@ Cost                = [ int(i[4][1:]) for i in lines ]
 
 m = Model("Pure Fresh")
 
-X = {}
+X = {} # delivered
+S = {} # stored
 for c in C:
     for q in Q:
-        # make a variable representing the number of barrels shipped to each
+        # make a variable representing the number of barrels delivered to each
         # city in each quarter
-        X[(c, q)] = m.addVar(vtype=GRB.INTEGER)
+        X[c, q] = m.addVar(vtype=GRB.INTEGER)
 
-def barrels_getting_stored(c, q):
-    new_supply = X[(c, q)]
-
-    if q == 0: # AKA "Q1" 
-        return InitialSupply[c] + new_supply - Demand[c][q]
-    else:
-        return barrels_getting_stored(c, q - 1) + new_supply - Demand[c][q]
+        # make a variable representing the number of barrels stored in each
+        # city in each quarter
+        S[c, q] = m.addVar(vtype=GRB.INTEGER)
 
 cost_function = quicksum(
-    barrels_getting_stored(c, q) * STORAGE_COST_PER_QUARTER
+    S[c, q] * STORAGE_COST_PER_QUARTER
     +
-    X[(c, q)] * Cost[q]
+    X[c, q] * Cost[q]
     for c in C for q in Q
 )
 
 m.setObjective(cost_function, GRB.MINIMIZE)
 
+for c in C:
+    for q in Q:
+        if q == 0: 
+            m.addConstr(
+                InitialSupply[c] + X[c, q] - Demand[c][q] == S[c, q]
+            )
+        else:
+            m.addConstr(
+                S[c, q - 1] + X[c, q] - Demand[c][q] == S[c, q]
+            )
+
 # "Each quarter..."
 for q in Q:
     # "...we use a single ship for imports ... with a capacity of 10 000 barrels"
-    m.addConstr(quicksum(X[(c, q)] for c in C) <= SHIP_CAPACITY)
+    m.addConstr(quicksum(X[c, q] for c in C) <= SHIP_CAPACITY)
 
-for c in C:
-    for q in Q:
-        # kinda a nifty little trick here;
-        # this ensures that demand is being met each quarter
-        # (look at what barrels_getting_stored expresses)
-        m.addConstr(barrels_getting_stored(c, q) >= 0)
+
+###############################################################################
+
+def print_vars(communication):
+    columns = "{:>12} {:>12} {:>12} {:>12}"
+
+    print()
+    print(communication)
+
+    for (stage, var) in [ ("Deliveries", X), ("Stored", S) ]:
+        print()
+        print(stage)
+        print()
+        print(columns.format("Quarter", *Cities))
+
+        for q in Q:
+            print(columns.format(Quarter[q], *[int(var[c, q].x) for c in C]))
+
+    print()
+    print("Optimal cost: ${:,}".format(m.objVal))
+    print()
+
+
+"""
+Deliveries
+
+     Quarter     Brisbane    Melbourne     Adelaide
+          Q1            0         2200         7800
+          Q2         3200         6800            0
+          Q3            0            0            0
+          Q4         4150          300            0
+          Q5            0            0            0
+          Q6         1950         5850         2200
+          Q7         2600          700         1850
+          Q8         2700         1350         1950
+
+Stored
+
+     Quarter     Brisbane    Melbourne     Adelaide
+          Q1         1400         3800         8400
+          Q2         2500         7200         6600
+          Q3            0         4400         4900
+          Q4         1750         2500         2500
+          Q5            0            0            0
+          Q6            0         2250            0
+          Q7            0            0            0
+          Q8            0            0            0
+
+Optimal cost: $43,704,050.00
+"""
 
 m.optimize()
+print_vars("Communication 1")
 
 ###############################################################################
 
+for c in C:
+    last_quarter = Q[-1]
+
+    m.addConstr(
+        # ...it would be desirable to end up with at least 3000 barrels in storage in each port.
+        S[c, last_quarter] >= 3000
+    )
+
 """
+Deliveries
+
      Quarter     Brisbane    Melbourne     Adelaide
-          Q1       2200.0         -0.0       7800.0
-          Q2       1000.0       9000.0         -0.0
-          Q3         -0.0         -0.0         -0.0
-          Q4       4150.0        300.0         -0.0
-          Q5         -0.0         -0.0         -0.0
-          Q6       1950.0       4000.0       4050.0
-          Q7       2600.0       2550.0         -0.0
-          Q8       2700.0       1350.0       1950.0
+          Q1            0         2200         7800
+          Q2         7500         2500            0
+          Q3            0            0            0
+          Q4            0         4600            0
+          Q5            0            0            0
+          Q6         4200         3600         2200
+          Q7          200         7300         2500
+          Q8         5700            0         4300
 
-Optimal cost: $43,704,050.0
+Stored
+
+     Quarter     Brisbane    Melbourne     Adelaide
+          Q1         1400         3800         8400
+          Q2         6800         2900         6600
+          Q3         4300          100         4900
+          Q4         1900         2500         2500
+          Q5          150            0            0
+          Q6         2400            0            0
+          Q7            0         4350          650
+          Q8         3000         3000         3000
+
+Optimal cost: $53,169,450.0
 """
 
-columns = "{:>12} {:>12} {:>12} {:>12}"
-
-print()
-print(columns.format("Quarter", *Cities))
-
-for q in Q:
-    print(columns.format(Quarter[q], *[X[(c, q)].x for c in C]))
-
-print()
-print("Optimal cost: ${:,}".format(m.objVal))
+m.optimize()
+print_vars("Communication 2")
 
 ###############################################################################
-
