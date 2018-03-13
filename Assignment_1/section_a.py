@@ -1,4 +1,4 @@
-__author__  = "Mawell Bo, Chantel Morris"
+__author__  = "Maxwell Bo, Chantel Morris"
 
 """Assignment 1 - Linear Programming - Section A"""
 
