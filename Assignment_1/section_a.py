@@ -4,6 +4,8 @@ __author__  = "Maxwell Bo, Chantel Morris"
 
 from gurobipy import *
 
+m = Model("Pure Fresh")
+
 SHIP_CAPACITY = 10000
 
 STORAGE_COST_PER_QUARTER = 25
@@ -38,7 +40,6 @@ C = range(len(Cities))
 ########
 # DATA #
 ########
-
 InitialSupply = [ BRISBANE_BARRELS, MELBOURNE_BARRELS,  ADELAIDE_BARRELS ]
 
 BrisbaneDemand      = [ int(i[1])     for i in lines ]
@@ -49,10 +50,9 @@ Demand =        [ BrisbaneDemand,   MelbourneDemand,    AdelaideDemand ]
 Cost                = [ int(i[4][1:]) for i in lines ]
 # slicing `1:` to remove the dollar sign
 
-###############################################################################
-
-m = Model("Pure Fresh")
-
+#############
+# VARIABLES #
+#############
 X = {} # delivered
 S = {} # stored
 for c in C:
@@ -65,6 +65,10 @@ for c in C:
         # city at the end of each quarter
         S[c, q] = m.addVar(vtype=GRB.INTEGER)
 
+
+#############
+# OBJECTIVE #
+#############
 cost_function = quicksum(
     S[c, q] * STORAGE_COST_PER_QUARTER
     +
@@ -74,9 +78,15 @@ cost_function = quicksum(
 
 m.setObjective(cost_function, GRB.MINIMIZE)
 
+###############
+# CONSTRAINTS #
+###############
+
+first_quarter = Q[0]
+
 for c in C:
     for q in Q:
-        if q == 0: 
+        if q == first_quarter: 
             m.addConstr(
                 InitialSupply[c] + X[c, q] - Demand[c][q] == S[c, q]
             )
@@ -113,7 +123,27 @@ def print_vars(communication):
     print()
 
 
+m.optimize()
+print_vars("Communication 1")
+
+###############################################################################
+
+for c in C:
+    last_quarter = Q[-1]
+
+    m.addConstr(
+        # "...it would be desirable to end up with at least 3000 barrels in storage in each port."
+        S[c, last_quarter] >= 3000
+    )
+
+m.optimize()
+print_vars("Communication 2")
+
+###############################################################################
+
 """
+Communicaton 1
+
 Deliveries
 
      Quarter     Brisbane    Melbourne     Adelaide
@@ -141,20 +171,9 @@ Stored
 Optimal cost: $43,704,050.00
 """
 
-m.optimize()
-print_vars("Communication 1")
-
-###############################################################################
-
-for c in C:
-    last_quarter = Q[-1]
-
-    m.addConstr(
-        # ...it would be desirable to end up with at least 3000 barrels in storage in each port.
-        S[c, last_quarter] >= 3000
-    )
-
 """
+Communication 2
+
 Deliveries
 
      Quarter     Brisbane    Melbourne     Adelaide
@@ -181,8 +200,3 @@ Stored
 
 Optimal cost: $53,169,450.0
 """
-
-m.optimize()
-print_vars("Communication 2")
-
-###############################################################################
