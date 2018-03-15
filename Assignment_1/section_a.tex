@@ -12,19 +12,25 @@
 
 \section*{Sets}
 
-$C$ cities\\
-$Q$ quarters\\
+\begin{tabular}{rl}
+    $C$ & Set of cities\\
+    $Q$ & Set of quarters
+\end{tabular}
 
 \section*{Data}
 
-$i_c$ current number of barrels in city $c \in C$ \footnote{$i$ for initial}\\
-$d_{cq}$ predicted demand of barrels in $c \in C$ for quarter $q \in Q$\\
-$c_q$ predicted cost of dollars per barrel for quarter $q \in Q$\\
+\begin{tabular}{rl}
+    $i_c$ & Current number of barrels in city $c \in C$ \footnote{$i$ for initial}\\
+    $d_{cq}$ & Predicted demand of barrels in $c \in C$ for quarter $q \in Q$\\
+    $c_q$ & Predicted cost of dollars per barrel for quarter $q \in Q$\\
+\end{tabular}
 
 \section*{Variables}
 
-$x_{cq}$ number of barrels to deliver to city $c \in C$ in quarter $q \in Q$\\
-$s_{cq}$ number of barrels to store in city $c \in C$ at the end of quarter $q \in Q$\\
+\begin{tabular}{rl}
+    $x_{cq}$ & Number of barrels to deliver to city $c \in C$ in quarter $q \in Q$\\
+    $s_{cq}$ & Number of barrels to store in city $c \in C$ at the end of quarter $q \in Q$\\
+\end{tabular}
 
 \section*{Objective}
 
@@ -34,28 +40,18 @@ $s_{cq}$ number of barrels to store in city $c \in C$ at the end of quarter $q \
 
 \section*{Constraints}
 
-\[
-\sum_{c \in C} x_{cq} \leq 10000 \quad \forall q \in Q
-\]
-
-\[
-i_{c} +  x_{cf} - d_{cf} = s_{cf} \quad \forall c \in C
-\]
-
-\[
-s_{c(q - 1)} +  x_{cq} - d_{cq} = s_{cq} \quad \forall c \in C,\  \forall q \in Q \setminus \{ f \}
-\]
-
-\[
-x_{cq} \geq 0 \quad \forall c \in C,\  \forall q \in Q\\
-\]
-
+\begin{align}
+\sum_{c \in C} x_{cq} \leq 10000 && \forall q \in Q \label{C1}\\
+i_{c} +  x_{cf} - d_{cf} = s_{cf} && \forall c \in C \label{C2}\\
+s_{c(q - 1)} +  x_{cq} - d_{cq} = s_{cq} && \forall c \in C,\  \forall q \in Q \setminus \{ f \} \label{C3}\\
+x_{cq} \geq 0 && \forall c \in C,\  \forall q \in Q \label{C4}
+\end{align}
 
 and optionally
 
-\[
-    S_{cl} \geq 3000 \quad \forall c \in C
-\]
+\begin{align}
+    S_{cl} \geq 3000 && \forall c \in C
+\end{align}
 
 where $f$ is the first quarter, and $l$ is the last quarter. 
 
