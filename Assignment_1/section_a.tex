@@ -23,6 +23,7 @@
     $i_c$ & Current number of barrels in city $c \in C$ \footnote{$i$ for initial}\\
     $d_{cq}$ & Predicted demand of barrels in $c \in C$ for quarter $q \in Q$\\
     $c_q$ & Predicted cost of dollars per barrel for quarter $q \in Q$\\
+    $m_c$ & Maximum storage capacity of barrels in $c \in C$ \footnote{$m$ for maxiumum}
 \end{tabular}
 
 \section*{Variables}
@@ -41,18 +42,15 @@
 \section*{Constraints}
 
 \begin{align}
-\sum_{c \in C} x_{cq} \leq 10000 && \forall q \in Q \label{C1}\\
-i_{c} +  x_{cf} - d_{cf} = s_{cf} && \forall c \in C \label{C2}\\
-s_{c(q - 1)} +  x_{cq} - d_{cq} = s_{cq} && \forall c \in C,\  \forall q \in Q \setminus \{ f \} \label{C3}\\
-x_{cq} \geq 0 && \forall c \in C,\  \forall q \in Q \label{C4}
+x_{cq} & \geq 0 & \forall c \in C,\  \forall q \in Q \label{C1}\\
+s_{cq} & \geq 0 & \forall c \in C,\  \forall q \in Q \label{C2}\\
+\sum_{c \in C} x_{cq} & \leq 10000 & \forall q \in Q \label{C3}\\
+i_{c} +  x_{cf} - d_{cf} & = s_{cf} & \forall c \in C \label{C4}\\
+s_{c(q - 1)} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in Q \setminus \{ f \} \label{C5}\\
+s_{cl} & \geq 3000 & \forall c \in C \label{C6}\\
+s_{cq} & \leq m_c & \forall c \in C,\  \forall q \in Q \label{C7}
 \end{align}
 
-and optionally
-
-\begin{align}
-    S_{cl} \geq 3000 && \forall c \in C
-\end{align}
-
-where $f$ is the first quarter, and $l$ is the last quarter. 
+where $f$ is the first quarter, and $l$ is the last quarter, where $f, l \in Q$.
 
 \end{document}

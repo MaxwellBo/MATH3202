@@ -6,13 +6,27 @@ from gurobipy import *
 
 m = Model("Pure Fresh")
 
+# "Each quarter we use a single ship for imports with a capacity of 10,000 barrels."
 SHIP_CAPACITY = 10000
 
-STORAGE_COST_PER_QUARTER = 25
-
+# "We currently have 
+# 3200 barrels of frozen concentrated orange juice in Brisbane, 
+# 4000 barrels in Melbourne, and 
+# 3800 barrels in Adelaide."
 BRISBANE_BARRELS = 3200
 MELBOURNE_BARRELS = 4000
 ADELAIDE_BARRELS = 3800
+
+# "We can store any concentrate on hand at the end of a quarter for a cost of $25 per barrel."
+STORAGE_COST_PER_QUARTER = 25
+
+# "We have a maximum storage capacity of 
+# 3900 barrels in Brisbane, 
+# 5500 barrels in Melbourne and 
+# 6700 barrels in Adelaide."
+BRISBANE_MAXIMUM_CAPACITY = 3900
+MELBOURNE_MAXIMUM_CAPACITY = 5500
+ADELAIDE_MAXIMUM_CAPACITY = 6700
 
 # Quarter	Brisbane	Melbourne	Adelaide	Cost
 table = """
@@ -50,6 +64,8 @@ Demand =        [ BrisbaneDemand,   MelbourneDemand,    AdelaideDemand ]
 Cost                = [ int(i[4][1:]) for i in lines ]
 # slicing `1:` to remove the dollar sign
 
+MaximumCapacity = [ BRISBANE_MAXIMUM_CAPACITY, MELBOURNE_MAXIMUM_CAPACITY, ADELAIDE_MAXIMUM_CAPACITY ]
+
 #############
 # VARIABLES #
 #############
@@ -86,7 +102,7 @@ first_quarter = Q[0]
 
 for c in C:
     for q in Q:
-        if q == first_quarter: 
+        if q == first_quarter:
             m.addConstr(
                 InitialSupply[c] + X[c, q] - Demand[c][q] == S[c, q]
             )
@@ -95,13 +111,13 @@ for c in C:
                 S[c, q - 1] + X[c, q] - Demand[c][q] == S[c, q]
             )
 
-# "Each quarter..."
+# "Each quarter...
 for q in Q:
-    # "...we use a single ship for imports ... with a capacity of 10 000 barrels"
+    # ...we use a single ship for imports ... with a capacity of 10 000 barrels"
     m.addConstr(quicksum(X[c, q] for c in C) <= SHIP_CAPACITY)
 
 
-###############################################################################
+################################################################################
 
 def print_vars(communication):
     columns = "{:>12} {:>12} {:>12} {:>12}"
@@ -122,11 +138,12 @@ def print_vars(communication):
     print("Optimal cost: ${:,}".format(m.objVal))
     print()
 
+################################################################################
 
 m.optimize()
 print_vars("Communication 1")
 
-###############################################################################
+################################################################################
 
 for c in C:
     last_quarter = Q[-1]
@@ -139,7 +156,19 @@ for c in C:
 m.optimize()
 print_vars("Communication 2")
 
-###############################################################################
+################################################################################
+
+for c in C:
+    for q in Q:
+        m.addConstr(
+            # "...ensure that we do not exceed the capacities of our facilities in each port."
+            S[c, q] <= MaximumCapacity[c]
+        )
+
+m.optimize()
+print_vars("Communication 3")
+
+################################################################################
 
 """
 Communicaton 1
@@ -199,4 +228,34 @@ Stored
           Q8         3000         3000         3000
 
 Optimal cost: $53,169,450.0
+"""
+
+"""
+Communication 3
+
+Deliveries
+
+     Quarter     Brisbane    Melbourne     Adelaide
+          Q1            0         3900         6100
+          Q2         4600         3400         1800
+          Q3            0            0            0
+          Q4         2750         2000           50
+          Q5            0            0            0
+          Q6         1950         3600         4450
+          Q7         6500         3500            0
+          Q8         1800         3800         4400
+
+Stored
+
+     Quarter     Brisbane    Melbourne     Adelaide
+          Q1         1400         5500         6700
+          Q2         3900         5500         6700
+          Q3         1400         2700         5000
+          Q4         1750         2500         2650
+          Q5            0            0          150
+          Q6            0            0         2400
+          Q7         3900          550          550
+          Q8         3000         3000         3000
+
+Optimal cost: $53,177,650.0
 """
