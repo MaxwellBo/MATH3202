@@ -104,17 +104,22 @@ for c in C:
     for q in Q:
         if q == first_quarter:
             m.addConstr(
-                InitialSupply[c] + X[c, q] - Demand[c][q] == S[c, q]
+                InitialSupply[c] + X[c, q] - Demand[c][q] == S[c, q],
+                "BaseStored"
             )
         else:
             m.addConstr(
-                S[c, q - 1] + X[c, q] - Demand[c][q] == S[c, q]
+                S[c, q - 1] + X[c, q] - Demand[c][q] == S[c, q],
+                "InductiveStored"
             )
 
 # "Each quarter...
 for q in Q:
     # ...we use a single ship for imports ... with a capacity of 10 000 barrels"
-    m.addConstr(quicksum(X[c, q] for c in C) <= SHIP_CAPACITY)
+    m.addConstr(
+        quicksum(X[c, q] for c in C) <= SHIP_CAPACITY,
+        "ShipCapacity"
+    )
 
 
 ################################################################################
@@ -150,7 +155,8 @@ for c in C:
 
     m.addConstr(
         # "...it would be desirable to end up with at least 3000 barrels in storage in each port."
-        S[c, last_quarter] >= 3000
+        S[c, last_quarter] >= 3000,
+        "LastQuarterStorage"
     )
 
 m.optimize()
@@ -162,7 +168,8 @@ for c in C:
     for q in Q:
         m.addConstr(
             # "...ensure that we do not exceed the capacities of our facilities in each port."
-            S[c, q] <= MaximumCapacity[c]
+            S[c, q] <= MaximumCapacity[c],
+            "MaximumCapacity"
         )
 
 m.optimize()
