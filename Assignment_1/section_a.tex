@@ -51,6 +51,11 @@ s_{cl} & \geq 3000 & \forall c \in C \label{C6}\\
 s_{cq} & \leq m_c & \forall c \in C,\  \forall q \in Q \label{C7}
 \end{align}
 
-where $f$ is the first quarter, and $l$ is the last quarter, where $f, l \in Q$.
+where $f$ is the first quarter, and $l$ is the last quarter, where $f, l \in Q$.\\
 
+Constraints (\ref{C1}) and (\ref{C2}) are basic non-negativity constraints on our variables. 
+Constraints (\ref{C3}) ensures that the amount shipped per quarter does not exceed the ships capacity.
+Constraints (\ref{C4}) and (\ref{C5}) describe a recursive relationship between initial supplies, new deliveries, demand, and the amount stored at the end of each quarter.
+Constarint (\ref{C6}) ensures that there at least 3000 barrels in storage in each port by the end of the last quarter.
+Constarint (\ref{C7}) ensures that we do not exceed the capacities of our facilities in each port.
 \end{document}
