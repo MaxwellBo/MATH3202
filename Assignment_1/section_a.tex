@@ -52,7 +52,7 @@ nohead]{geometry}
 x_{cq} & \geq 0 & \forall c \in C,\  \forall q \in Q \label{C1}\\
 s_{cq} & \geq 0 & \forall c \in C,\  \forall q \in Q \label{C2}\\
 \sum_{c \in C} x_{cq} & \leq 10000 & \forall q \in Q \label{C3}\\
-i_{c} +  x_{cf} - d_{cf} & = s_{cf} & \forall c \in C \label{C4}\\
+i_{c} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in \{ f \} \label{C4}\\
 s_{c(q - 1)} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in Q \setminus \{ f \} \label{C5}\\
 s_{cl} & \geq 3000 & \forall c \in C \label{C6}\\
 s_{cq} & \leq m_c & \forall c \in C,\  \forall q \in Q \label{C7}
