@@ -94,18 +94,19 @@ m.setObjective(cost_function, GRB.MINIMIZE)
 
 first_quarter = Q[0]
 
-for c in C:
-    for q in Q:
-        if q == first_quarter:
-            m.addConstr(
-                InitialSupply[c] + X[c, q] - Demand[c][q] == S[c, q],
-                "BaseStored"
-            )
-        else:
-            m.addConstr(
-                S[c, q - 1] + X[c, q] - Demand[c][q] == S[c, q],
-                "InductiveStored"
-            )
+BaseStored = {
+    c: m.addConstr(
+        InitialSupply[c] + X[c, q] - Demand[c][q] == S[c, q]
+    )
+    for c in C for q in [ first_quarter ]
+}
+
+InductiveStored = {
+    (c, q): m.addConstr(
+        S[c, q - 1] + X[c, q] - Demand[c][q] == S[c, q]
+    )
+    for c in C for q in Q[1:] # everything but the first quarter
+}
 
 ShipCapacity = {
     # ...we use a single ship for imports ... with a capacity of 10 000 barrels"
@@ -170,6 +171,10 @@ MaximumCapacity = {
 
 m.optimize()
 print_vars("Communication 3")
+
+# for (i, c) in ShipCapacity.items():
+#     print(c.SARHSUp)
+#     print(c.SARHSLow)
 
 ################################################################################
 
