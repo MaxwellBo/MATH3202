@@ -71,10 +71,10 @@ MaximumCapacity = [ BRISBANE_MAXIMUM_CAPACITY, MELBOURNE_MAXIMUM_CAPACITY, ADELA
 #############
 
 # make a variable representing the number of barrels delivered to each city in each quarter
-X = { (c, q): m.addVar(vtype=GRB.INTEGER) for c in C for q in Q } 
+X = { (c, q): m.addVar() for c in C for q in Q } 
 
 # make a variable representing the number of barrels stored in each city at the end of each quarter
-S = { (c, q): m.addVar(vtype=GRB.INTEGER) for c in C for q in Q} # stored
+S = { (c, q): m.addVar() for c in C for q in Q }
 
 #############
 # OBJECTIVE #
@@ -149,8 +149,7 @@ last_quarter = Q[-1]
 LastQuarterStorage = {
     c: m.addConstr(
         # "...it would be desirable to end up with at least 3000 barrels in storage in each port."
-        S[c, last_quarter] >= 3000,
-        "LastQuarterStorage"
+        S[c, last_quarter] >= 3000
     )
     for c in C
 }
@@ -163,18 +162,13 @@ print_vars("Communication 2")
 MaximumCapacity = {
     (c, q): m.addConstr(
         # "...ensure that we do not exceed the capacities of our facilities in each port."
-        S[c, q] <= MaximumCapacity[c],
-        "MaximumCapacity"
+        S[c, q] <= MaximumCapacity[c]
     )
     for c in C for q in Q
 }
 
 m.optimize()
 print_vars("Communication 3")
-
-# for (i, c) in ShipCapacity.items():
-#     print(c.SARHSUp)
-#     print(c.SARHSLow)
 
 ################################################################################
 
