@@ -69,18 +69,12 @@ MaximumCapacity = [ BRISBANE_MAXIMUM_CAPACITY, MELBOURNE_MAXIMUM_CAPACITY, ADELA
 #############
 # VARIABLES #
 #############
-X = {} # delivered
-S = {} # stored
-for c in C:
-    for q in Q:
-        # make a variable representing the number of barrels delivered to each
-        # city in each quarter
-        X[c, q] = m.addVar(vtype=GRB.INTEGER)
 
-        # make a variable representing the number of barrels stored in each
-        # city at the end of each quarter
-        S[c, q] = m.addVar(vtype=GRB.INTEGER)
+# make a variable representing the number of barrels delivered to each city in each quarter
+X = { (c, q): m.addVar(vtype=GRB.INTEGER) for c in C for q in Q } 
 
+# make a variable representing the number of barrels stored in each city at the end of each quarter
+S = { (c, q): m.addVar(vtype=GRB.INTEGER) for c in C for q in Q} # stored
 
 #############
 # OBJECTIVE #
@@ -113,14 +107,13 @@ for c in C:
                 "InductiveStored"
             )
 
-# "Each quarter...
-for q in Q:
+ShipCapacity = {
     # ...we use a single ship for imports ... with a capacity of 10 000 barrels"
-    m.addConstr(
-        quicksum(X[c, q] for c in C) <= SHIP_CAPACITY,
-        "ShipCapacity"
+    q: m.addConstr(
+        quicksum(X[c, q] for c in C) <= SHIP_CAPACITY
     )
-
+    for q in Q  # "Each quarter...
+}
 
 ################################################################################
 
@@ -150,27 +143,30 @@ print_vars("Communication 1")
 
 ################################################################################
 
-for c in C:
-    last_quarter = Q[-1]
+last_quarter = Q[-1]
 
-    m.addConstr(
+LastQuarterStorage = {
+    c: m.addConstr(
         # "...it would be desirable to end up with at least 3000 barrels in storage in each port."
         S[c, last_quarter] >= 3000,
         "LastQuarterStorage"
     )
+    for c in C
+}
 
 m.optimize()
 print_vars("Communication 2")
 
 ################################################################################
 
-for c in C:
-    for q in Q:
-        m.addConstr(
-            # "...ensure that we do not exceed the capacities of our facilities in each port."
-            S[c, q] <= MaximumCapacity[c],
-            "MaximumCapacity"
-        )
+MaximumCapacity = {
+    (c, q): m.addConstr(
+        # "...ensure that we do not exceed the capacities of our facilities in each port."
+        S[c, q] <= MaximumCapacity[c],
+        "MaximumCapacity"
+    )
+    for c in C for q in Q
+}
 
 m.optimize()
 print_vars("Communication 3")
