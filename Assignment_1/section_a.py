@@ -6,6 +6,10 @@ from gurobipy import *
 
 m = Model("Pure Fresh")
 
+THREE_COLUMNS = "{:>12} {:>12} {:>12}"
+FOUR_COLUMNS = "{:>12} {:>12} {:>12} {:>12}"
+
+
 # "Each quarter we use a single ship for imports with a capacity of 10,000 barrels."
 SHIP_CAPACITY = 10000
 
@@ -108,7 +112,7 @@ InductiveStored = {
     for c in C for q in Q[1:] # everything but the first quarter
 }
 
-ShipCapacity = {
+ShipCapacityBound = {
     # ...we use a single ship for imports ... with a capacity of 10 000 barrels"
     q: m.addConstr(
         quicksum(X[c, q] for c in C) <= SHIP_CAPACITY
@@ -119,8 +123,6 @@ ShipCapacity = {
 #------------------------------------------------------------------------------#
 
 def print_vars(communication):
-    columns = "{:>12} {:>12} {:>12} {:>12}"
-
     print()
     print(communication)
 
@@ -128,13 +130,55 @@ def print_vars(communication):
         print()
         print(stage)
         print()
-        print(columns.format("Quarter", *Cities))
+        print(FOUR_COLUMNS.format("Quarter", *Cities))
 
         for q in Q:
-            print(columns.format(Quarter[q], *[int(var[c, q].x) for c in C]))
+            print(FOUR_COLUMNS.format(Quarter[q], *[int(var[c, q].x) for c in C]))
 
     print()
     print("Optimal cost: ${:,}".format(m.objVal))
+    print()
+
+def analyse_ship_capacity():
+    print("Ship capacity ({}) sensitivity analysis".format(SHIP_CAPACITY))
+    print()
+    print(THREE_COLUMNS.format("Quarter", "Pi", "Slack"))
+
+    for (q, constraint) in ShipCapacityBound.items():
+        print(THREE_COLUMNS.format(
+            Quarter[q], 
+            int(constraint.pi), 
+            int(constraint.slack)
+        ))
+    
+    print()
+
+def analyse_maximum_port_capacity():
+    print("Port maximum capacity ({}) sensitivity analysis: Pi".format(MaximumCapacity))
+    print()
+    print(FOUR_COLUMNS.format("Quarter", *Cities))
+
+    for q in Q:
+        print(FOUR_COLUMNS.format(Quarter[q], *[int(MaximumCapacityBound[c, q].pi) for c in C]))
+
+    print()
+
+def analyse_demand_sensitivity():
+    print("Demand sensitivity analysis: Pi")
+    print()
+    print(FOUR_COLUMNS.format("Quarter", *Cities))
+
+    for q in Q[1:]:
+        print(FOUR_COLUMNS.format(Quarter[q], *[int(InductiveStored[c, q].pi) for c in C]))
+
+    print()
+
+def analyse_initial_stored():
+    print("Initial supply ({}) sensitivity analysis".format(InitialSupply))
+    print()
+    print(FOUR_COLUMNS.format("", *Cities))
+    print(FOUR_COLUMNS.format("Pi", *[int(BaseStored[c].pi) for c in C]))
+    print(FOUR_COLUMNS.format("Slack", *[int(BaseStored[c].slack) for c in C]))
     print()
 
 #------------------------------------------------------------------------------#
@@ -146,7 +190,7 @@ print_vars("Communication 1")
 
 last_quarter = Q[-1]
 
-LastQuarterStorage = {
+LastQuarterStorageBound = {
     c: m.addConstr(
         # "...it would be desirable to end up with at least 3000 barrels in storage in each port."
         S[c, last_quarter] >= 3000
@@ -159,7 +203,7 @@ print_vars("Communication 2")
 
 #------------------------------------------------------------------------------#
 
-MaximumCapacity = {
+MaximumCapacityBound = {
     (c, q): m.addConstr(
         # "...ensure that we do not exceed the capacities of our facilities in each port."
         S[c, q] <= MaximumCapacity[c]
@@ -170,17 +214,10 @@ MaximumCapacity = {
 m.optimize()
 print_vars("Communication 3")
 
-def print_pi():
-    columns = "{:>12} {:>12} {:>12}"
-
-    print()
-
-    print(columns.format("Quarter", "Pi", "Slack"))
-
-    for (q, constraint) in ShipCapacity.items():
-        print(columns.format(Quarter[q], int(constraint.pi), int(constraint.slack)))
-
-print_pi()
+analyse_initial_stored()
+analyse_demand_sensitivity()
+analyse_ship_capacity()
+analyse_maximum_port_capacity()
     
 
 #------------------------------------------------------------------------------#
@@ -273,4 +310,45 @@ Stored
           Q8         3000         3000         3000
 
 Optimal cost: $53,177,650.0
+
+Initial supply ([3200, 4000, 3800]) sensitivity analysis
+
+                 Brisbane    Melbourne     Adelaide
+          Pi          876          876          876
+       Slack            0            0            0
+
+Demand sensitivity analysis: Pi
+
+     Quarter     Brisbane    Melbourne     Adelaide
+          Q2          901          901          901
+          Q3          967          967          967
+          Q4          992          992          992
+          Q5         1017         1017         1017
+          Q6         1042         1042         1042
+          Q7         1067         1067         1067
+          Q8         1092         1092         1092
+
+Ship capacity (10000) sensitivity analysis
+
+     Quarter           Pi        Slack
+          Q1           -3            0
+          Q2            0          200
+          Q3            0        10000
+          Q4            0         5200
+          Q5            0        10000
+          Q6         -136            0
+          Q7          -56            0
+          Q8          -79            0
+
+Port maximum capacity ([3900, 5500, 6700]) sensitivity analysis: Pi
+
+     Quarter     Brisbane    Melbourne     Adelaide
+          Q1            0            0            0
+          Q2          -41          -41          -41
+          Q3            0            0            0
+          Q4            0            0            0
+          Q5            0            0            0
+          Q6            0            0            0
+          Q7            0            0            0
+          Q8            0            0            0
 """
