@@ -116,7 +116,7 @@ ShipCapacity = {
     for q in Q  # "Each quarter...
 }
 
-################################################################################
+#------------------------------------------------------------------------------#
 
 def print_vars(communication):
     columns = "{:>12} {:>12} {:>12} {:>12}"
@@ -137,12 +137,12 @@ def print_vars(communication):
     print("Optimal cost: ${:,}".format(m.objVal))
     print()
 
-################################################################################
+#------------------------------------------------------------------------------#
 
 m.optimize()
 print_vars("Communication 1")
 
-################################################################################
+#------------------------------------------------------------------------------#
 
 last_quarter = Q[-1]
 
@@ -157,7 +157,7 @@ LastQuarterStorage = {
 m.optimize()
 print_vars("Communication 2")
 
-################################################################################
+#------------------------------------------------------------------------------#
 
 MaximumCapacity = {
     (c, q): m.addConstr(
@@ -170,7 +170,20 @@ MaximumCapacity = {
 m.optimize()
 print_vars("Communication 3")
 
-################################################################################
+def print_pi():
+    columns = "{:>12} {:>12} {:>12}"
+
+    print()
+
+    print(columns.format("Quarter", "Pi", "Slack"))
+
+    for (q, constraint) in ShipCapacity.items():
+        print(columns.format(Quarter[q], int(constraint.pi), int(constraint.slack)))
+
+print_pi()
+    
+
+#------------------------------------------------------------------------------#
 
 """
 Communicaton 1
@@ -200,9 +213,9 @@ Stored
           Q8            0            0            0
 
 Optimal cost: $43,704,050.00
-"""
 
-"""
+...
+
 Communication 2
 
 Deliveries
@@ -230,9 +243,9 @@ Stored
           Q8         3000         3000         3000
 
 Optimal cost: $53,169,450.0
-"""
 
-"""
+...
+
 Communication 3
 
 Deliveries
