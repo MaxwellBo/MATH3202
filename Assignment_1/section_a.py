@@ -139,7 +139,7 @@ def print_vars(communication):
     print("Optimal cost: ${:,}".format(m.objVal))
     print()
 
-def analyse_ship_capacity():
+def analyse_ship_capacity_sensitivity():
     print("Ship capacity ({}) sensitivity analysis".format(SHIP_CAPACITY))
     print()
     print(THREE_COLUMNS.format("Quarter", "Pi", "Slack"))
@@ -153,7 +153,7 @@ def analyse_ship_capacity():
     
     print()
 
-def analyse_maximum_port_capacity():
+def analyse_maximum_port_capacity_sensitivity():
     print("Port maximum capacity ({}) sensitivity analysis: Pi".format(MaximumCapacity))
     print()
     print(FOUR_COLUMNS.format("Quarter", *Cities))
@@ -173,7 +173,7 @@ def analyse_demand_sensitivity():
 
     print()
 
-def analyse_initial_stored():
+def analyse_initial_stored_sensitivity():
     print("Initial supply ({}) sensitivity analysis".format(InitialSupply))
     print()
     print(FOUR_COLUMNS.format("", *Cities))
@@ -214,10 +214,10 @@ MaximumCapacityBound = {
 m.optimize()
 print_vars("Communication 3")
 
-analyse_initial_stored()
+analyse_initial_stored_sensitivity()
 analyse_demand_sensitivity()
-analyse_ship_capacity()
-analyse_maximum_port_capacity()
+analyse_ship_capacity_sensitivity()
+analyse_maximum_port_capacity_sensitivity()
     
 
 #------------------------------------------------------------------------------#
