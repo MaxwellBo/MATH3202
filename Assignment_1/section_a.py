@@ -223,7 +223,7 @@ analyse_maximum_port_capacity()
 #------------------------------------------------------------------------------#
 
 """
-Communicaton 1
+Communication 1
 
 Deliveries
 
