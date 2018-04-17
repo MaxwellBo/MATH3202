@@ -20,8 +20,20 @@ def tabulate(xy):
 
 # Thanks to your previous work, the average cost of reconstituted orange juice is $974 per thousand litres (kL).
 ORANGE_JUICE_COST = 974
+
+# We sell all juice produced for $1.50 per litre
 SELL_PRICE_PER_LITRE = 1.50
 SELL_PRICE_PER_KILOLITRE = 1.50 * 1000
+
+blend_table = """
+Orange Juice	100% Orange
+Orange and Mango Juice	90% Orange, 10% Mango
+Breakfast Juice	55% Apple, 28% Pineapple, 15% Orange, 2% Mango
+Tropical Juice	65% Apple, 30% Pineapple, 4% Orange, 1% Passionfruit
+Guava Delight	80% Apple, 10% Pineapple, 10% Guava
+Orchard Medley	50% Apple, 45% Orange, 5% Mango
+Strawberry Surprise	90% Apple, 8% Strawberry, 2% Guava
+"""
 
 # Fruit	Cost ($/kL)
 cost_table = """
@@ -44,25 +56,15 @@ demand_table = """
 625	740	468	409	665	750	411	464
 """
 
-blend_table = """
-Orange Juice	100% Orange
-Orange and Mango Juice	90% Orange, 10% Mango
-Breakfast Juice	55% Apple, 28% Pineapple, 15% Orange, 2% Mango
-Tropical Juice	65% Apple, 30% Pineapple, 4% Orange, 1% Passionfruit
-Guava Delight	80% Apple, 10% Pineapple, 10% Guava
-Orchard Medley	50% Apple, 45% Orange, 5% Mango
-Strawberry Surprise	90% Apple, 8% Strawberry, 2% Guava
-"""
-
 ########
 # SETS #
 ########
 
-Fruits = [ row[0] for row in tabulate(cost_table) ]
-F = range(len(Fruits))
-
 Juices = [ row[0] for row in tabulate(blend_table) ]
 J = range(len(Juices))
+
+Fruits = [ row[0] for row in tabulate(cost_table) ]
+F = range(len(Fruits))
 
 Quarters = [ "Q" + str(i) for i in range(1, 9) ]
 Q = range(len(Quarters))
