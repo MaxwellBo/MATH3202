@@ -12,7 +12,7 @@ m = Model("Pure Fresh")
 #########
 
 def tabulate(xy):
-    return [ y.split() for y in xy.strip().split('\n') ]
+    return [ row.split('\t') for row in xy.strip().split('\n') ]
 
 #############
 # CONSTANTS #
@@ -20,6 +20,8 @@ def tabulate(xy):
 
 # Thanks to your previous work, the average cost of reconstituted orange juice is $974 per thousand litres (kL).
 ORANGE_JUICE_COST = 974
+SELL_PRICE_PER_LITRE = 1.50
+SELL_PRICE_PER_KILOLITRE = 1.50 * 1000
 
 # Fruit	Cost ($/kL)
 cost_table = """
@@ -29,18 +31,17 @@ Pineapple	800
 Passionfruit	1500
 Guava	710
 Strawberry	1370
-Orange {}
-""".format(ORANGE_JUICE_COST)
+""" + "Orange	{}".format(ORANGE_JUICE_COST)
 
-# Quarter	Q1	Q2	Q3	Q4	Q5	Q6	Q7	Q8
+# Q1	Q2	Q3	Q4	Q5	Q6	Q7	Q8
 demand_table = """
-Orange Juice	973	872	1206	981	781	1055	1420	1236
-Orange & Mango Juice	311	347	469	389	329	363	484	568
-Breakfast Juice	682	707	838	938	586	788	1141	988
-Tropical Juice	492	586	726	739	450	549	645	779
-Guava Delight	340	459	593	393	276	424	559	389
-Orchard Medley	1151	621	697	909	1133	615	542	865
-Strawberry Surprise	625	740	468	409	665	750	411	464
+973	872	1206	981	781	1055	1420	1236
+311	347	469	389	329	363	484	568
+682	707	838	938	586	788	1141	988
+492	586	726	739	450	549	645	779
+340	459	593	393	276	424	559	389
+1151	621	697	909	1133	615	542	865
+625	740	468	409	665	750	411	464
 """
 
 blend_table = """
@@ -57,17 +58,14 @@ Strawberry Surprise	90% Apple, 8% Strawberry, 2% Guava
 # SETS #
 ########
 
-Fruits = [ i[0] for i in tabulate(cost_table) ]
+Fruits = [ row[0] for row in tabulate(cost_table) ]
 F = range(len(Fruits))
 
-Juices = [ i[0] for i in tabulate(demand_table) ]
+Juices = [ row[0] for row in tabulate(blend_table) ]
 J = range(len(Juices))
 
 Quarters = [ "Q" + str(i) for i in range(1, 9) ]
 Q = range(len(Quarters))
-
-
-
 
 ########
 # DATA #
@@ -75,8 +73,8 @@ Q = range(len(Quarters))
 
 Blend = namedtuple('Blend', Fruits)
 
-def make_blend(entry):
-    parts = entry.split('\t')[1].split(', ')
+def make_blend(cell):
+    parts = cell.split(', ')
     # ['90% Orange', '10% Mango']
 
     # care with global
@@ -90,22 +88,57 @@ def make_blend(entry):
 
         overrides[ingredient] = int(percentage[0:-1]) # -1 to strip percentage
 
-    return Blend(**{**defaults, **overrides})
+    return Blend(**{**defaults, **overrides}) # bigg splatt
 
-Blends = [ make_blend(i) for i in blend_table.strip().split('\n') ]
+def get_blend_price(blend):
+    return sum((blend[f] / 100) * Costs[f] for f in F)
 
+Blends = [ make_blend(row[1]) for row in tabulate(blend_table) ]
+
+Costs = [ int(row[1]) for row in tabulate(cost_table) ]
+
+Demands = [ [ int(i) for i in row ] for row in tabulate(demand_table) ]
 
 #############
 # VARIABLES #
 #############
 
+# make a variable representing the number of kL of a certain juice produced per quarter
+X = { (j, q): m.addVar() for j in J for q in Q }
+
 #############
 # OBJECTIVE #
 #############
 
+cost_function = quicksum(
+    X[j, q] * SELL_PRICE_PER_KILOLITRE
+    -
+    X[j, q] * get_blend_price(Blends[j])
+    for j in J for q in Q
+)
+
+m.setObjective(cost_function, GRB.MAXIMIZE)
+
 ###############
 # CONSTRAINTS #
 ###############
+
+DemandCeiling = {
+    (j, q): m.addConstr(
+        X[j, q] <= Demands[j][q]
+    )
+    for j in J for q in Q
+}
+
+def print_vars(communication):
+    print()
+    print(communication)
+    print()
+    print("Optimal cost: ${:,}".format(m.objVal))
+    print()
+
+m.optimize()
+print_vars("Communication 4")
 
 
 #-----------------------------------------------------------------------------#

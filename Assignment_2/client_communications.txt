@@ -1,0 +1,36 @@
+Communication 4
+Thank you for your advice on how to minimise the cost of purchasing our frozen concentrated orange juice for the next eight quarters. We are now looking at our processing operations in Brisbane and would again appreciate your help.
+
+In each quarter we will be using the FCOJ delivered to Brisbane to produce our signature range of Pure Fresh juices, made with fresh local fruit. Each barrel of concentrate can be reconstituted to make 1000 litres of orange juice. We can sell this directly as orange juice or blend it to make other juices, as shown in the following table:
+
+Regular Juices
+Orange Juice	100% Orange
+Orange and Mango Juice	90% Orange, 10% Mango
+Breakfast Juice	55% Apple, 28% Pineapple, 15% Orange, 2% Mango
+Tropical Juice	65% Apple, 30% Pineapple, 4% Orange, 1% Passionfruit
+Gourmet Juices
+Guava Delight	80% Apple, 10% Pineapple, 10% Guava
+Orchard Medley	50% Apple, 45% Orange, 5% Mango
+Strawberry Surprise	90% Apple, 8% Strawberry, 2% Guava
+Thanks to your previous work, the average cost of reconstituted orange juice is $974 per thousand litres (kL). Taking into account purchasing and processing, the costs of the local fruits are as follows:
+
+Fruit	Cost ($/kL)
+Apple	620
+Mango	1300
+Pineapple	800
+Passionfruit	1500
+Guava	710
+Strawberry	1370
+The amount of orange juice is limited by the demand we noted for our original shipping schedule into Brisbane. (We reconstitute it and will use it for other products as well, so you do not need to restrict amounts to whole numbers of barrels.) We can obtain any amount of the local fruits at the above prices.
+
+In each quarter we anticipate being able to sell at most the following amounts (kL) of each juice:
+
+Quarter	Q1	Q2	Q3	Q4	Q5	Q6	Q7	Q8
+Orange Juice	973	872	1206	981	781	1055	1420	1236
+Orange & Mango Juice	311	347	469	389	329	363	484	568
+Breakfast Juice	682	707	838	938	586	788	1141	988
+Tropical Juice	492	586	726	739	450	549	645	779
+Guava Delight	340	459	593	393	276	424	559	389
+Orchard Medley	1151	621	697	909	1133	615	542	865
+Strawberry Surprise	625	740	468	409	665	750	411	464
+We sell all juice produced for $1.50 per litre. Please provide us with the optimal profit from producing our juice range over the next eight quarters:
