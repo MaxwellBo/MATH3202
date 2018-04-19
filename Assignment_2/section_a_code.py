@@ -25,6 +25,18 @@ ORANGE_JUICE_COST = 974
 SELL_PRICE_PER_LITRE = 1.50
 SELL_PRICE_PER_KILOLITRE = 1.50 * 1000
 
+# Quarter   Brisbane
+brisbane_fcoj_supply_table = """
+Q1	1800
+Q2	2100
+Q3	2500
+Q4	2400
+Q5	1750
+Q6	1950
+Q7	2600
+Q8	2700
+"""
+
 blend_table = """
 Orange Juice	100% Orange
 Orange and Mango Juice	90% Orange, 10% Mango
@@ -60,27 +72,27 @@ demand_table = """
 # SETS #
 ########
 
-Juices = [ row[0] for row in tabulate(blend_table) ]
-J = range(len(Juices))
+Juice = [ row[0] for row in tabulate(blend_table) ]
+J = range(len(Juice))
 
-Fruits = [ row[0] for row in tabulate(cost_table) ]
-F = range(len(Fruits))
+Fruit = [ row[0] for row in tabulate(cost_table) ]
+F = range(len(Fruit))
 
-Quarters = [ "Q" + str(i) for i in range(1, 9) ]
-Q = range(len(Quarters))
+Quarter = [ "Q" + str(i) for i in range(1, 9) ]
+Q = range(len(Quarter))
 
 ########
 # DATA #
 ########
 
-Blend = namedtuple('Blend', Fruits)
+Parts = namedtuple('Parts', Fruit)
 
 def make_blend(cell):
     parts = cell.split(', ')
     # ['90% Orange', '10% Mango']
 
     # care with global
-    defaults = { k: 0 for k in Fruits }
+    defaults = { k: 0 for k in Fruit }
 
     overrides = {}
 
@@ -88,18 +100,22 @@ def make_blend(cell):
         percentage, ingredient = i.split()
         # "80%", "Apple"
 
-        overrides[ingredient] = int(percentage[0:-1]) # -1 to strip percentage
+        overrides[ingredient] = int(percentage[0:-1]) / 100 # -1 to strip percentage
 
-    return Blend(**{**defaults, **overrides}) # bigg splatt
+    return Parts(**{**defaults, **overrides}) # bigg splatt
 
-def get_blend_price(blend):
-    return sum((blend[f] / 100) * Costs[f] for f in F)
+def get_blend_price(parts):
+    return sum(parts[f] * Cost[f] for f in F)
 
-Blends = [ make_blend(row[1]) for row in tabulate(blend_table) ]
 
-Costs = [ int(row[1]) for row in tabulate(cost_table) ]
+# TODO: Rename these vars
+Blend = [ make_blend(row[1]) for row in tabulate(blend_table) ]
 
-Demands = [ [ int(i) for i in row ] for row in tabulate(demand_table) ]
+Cost = [ int(row[1]) for row in tabulate(cost_table) ]
+
+Demand = [ [ int(i) for i in row ] for row in tabulate(demand_table) ]
+
+BrisbaneFCOJSupply = [ int(row[1]) for row in tabulate(brisbane_fcoj_supply_table) ]
 
 #############
 # VARIABLES #
@@ -112,35 +128,47 @@ X = { (j, q): m.addVar() for j in J for q in Q }
 # OBJECTIVE #
 #############
 
-cost_function = quicksum(
+profit_function = quicksum(
     X[j, q] * SELL_PRICE_PER_KILOLITRE
     -
-    X[j, q] * get_blend_price(Blends[j])
+    X[j, q] * get_blend_price(Blend[j])
     for j in J for q in Q
 )
 
-m.setObjective(cost_function, GRB.MAXIMIZE)
+m.setObjective(profit_function, GRB.MAXIMIZE)
 
 ###############
 # CONSTRAINTS #
 ###############
 
-DemandCeiling = {
+DoNotExceedDemand = {
     (j, q): m.addConstr(
-        X[j, q] <= Demands[j][q]
+        X[j, q] <= Demand[j][q]
     )
     for j in J for q in Q
 }
 
+DoNotExceedBrisbaneFCOJSupply = {
+    q: m.addConstr(
+        quicksum(X[j, q] * Blend[j].Orange for j in J) <= BrisbaneFCOJSupply[q]
+    )
+    for q in Q
+}
+
+#------------------------------------------------------------------------------#
+
 def print_vars(communication):
+
     print()
     print(communication)
     print()
     print("Optimal cost: ${:,}".format(m.objVal))
     print()
 
+#------------------------------------------------------------------------------#
+
 m.optimize()
 print_vars("Communication 4")
-
+assert(int(m.objVal) == 26240835)
 
 #-----------------------------------------------------------------------------#
