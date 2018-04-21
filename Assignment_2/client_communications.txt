@@ -34,3 +34,17 @@ Guava Delight	340	459	593	393	276	424	559	389
 Orchard Medley	1151	621	697	909	1133	615	542	865
 Strawberry Surprise	625	740	468	409	665	750	411	464
 We sell all juice produced for $1.50 per litre. Please provide us with the optimal profit from producing our juice range over the next eight quarters:
+
+$26240836
+
+Communication 5
+Our transport division have advised us that their delivery trucks must always bring full loads of a single local fruit, equivalent to 10 kL of processed juice per truck. Could you take this into account in your cost calculations?
+
+Please provide us with the revised optimal profit from producing our juice range over the next eight quarters:
+
+$26065453
+
+Communication 6
+Due to staffing difficulties in manufacturing our gourmet juices (Guava Delight, Orchard Medley, and Strawberry Surprise) we would like to only produce two of these juices each quarter. Could you revise your blending schedule accordingly?
+
+Please provide us with the revised optimal profit from producing our juice range over the next eight quarters:
