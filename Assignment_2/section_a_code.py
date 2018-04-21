@@ -184,8 +184,11 @@ profit_function = quicksum(
     (X[j, q] * SELL_PRICE_PER_KILOLITRE)
     for j in J for q in Q
 ) - quicksum(
-    T[f, q] * TRUCK_LOAD_SIZE * Cost[f] 
-    for f in F for q in Q
+    T[f, q] * TRUCK_LOAD_SIZE * Cost[f]
+    for f in F[:-1] for q in Q
+) - quicksum(
+    X[j, q] * Blend[j].Orange * ORANGE_JUICE_COST
+    for j in J for q in Q
 )
 
 m.setObjective(profit_function, GRB.MAXIMIZE)
@@ -194,8 +197,9 @@ DoNotExceedFruitTruckDelivery = {
     (f, q): m.addConstr(
         quicksum(X[j, q] * Blend[j][f] for j in J) <= T[f, q] * TRUCK_LOAD_SIZE
     )
-    for f in F for q in Q
+    for f in F[:-1] for q in Q
 }
 
 m.optimize()
 print_vars("Communication 5")
+assert(round(m.objVal) == 26065453)
