@@ -25,6 +25,10 @@ ORANGE_JUICE_COST = 974
 SELL_PRICE_PER_LITRE = 1.50
 SELL_PRICE_PER_KILOLITRE = 1.50 * 1000
 
+# delivery trucks must always bring full loads of a single local fruit, 
+# equivalent to 10 kL of processed juice per truck
+TRUCK_LOAD_SIZE = 10
+
 # Quarter   Brisbane
 brisbane_fcoj_supply_table = """
 Q1	1800
@@ -100,15 +104,13 @@ def make_blend(cell):
         percentage, ingredient = i.split()
         # "80%", "Apple"
 
-        overrides[ingredient] = int(percentage[0:-1]) / 100 # -1 to strip percentage
+        overrides[ingredient] = int(percentage[0:-1]) / 100 # -1 to strip %
 
     return Parts(**{**defaults, **overrides}) # bigg splatt
 
 def get_blend_price(parts):
     return sum(parts[f] * Cost[f] for f in F)
 
-
-# TODO: Rename these vars
 Blend = [ make_blend(row[1]) for row in tabulate(blend_table) ]
 
 Cost = [ int(row[1]) for row in tabulate(cost_table) ]
@@ -122,16 +124,21 @@ BrisbaneFCOJSupply = [ int(row[1]) for row in tabulate(brisbane_fcoj_supply_tabl
 #############
 
 # make a variable representing the number of kL of a certain juice produced per quarter
+# TODO: TYPE
 X = { (j, q): m.addVar() for j in J for q in Q }
+
+# make a variable representing the number of trucks delivering a certain fruit per quarter
+# TODO: TYPE
+T = { (f, q): m.addVar(vtype=GRB.INTEGER) for f in F for q in Q }
 
 #############
 # OBJECTIVE #
 #############
 
 profit_function = quicksum(
-    X[j, q] * SELL_PRICE_PER_KILOLITRE
+    (X[j, q] * SELL_PRICE_PER_KILOLITRE)
     -
-    X[j, q] * get_blend_price(Blend[j])
+    (X[j, q] * get_blend_price(Blend[j]))
     for j in J for q in Q
 )
 
@@ -169,6 +176,26 @@ def print_vars(communication):
 
 m.optimize()
 print_vars("Communication 4")
-assert(int(m.objVal) == 26240835)
+assert(round(m.objVal) == 26240836)
 
 #-----------------------------------------------------------------------------#
+
+profit_function = quicksum(
+    (X[j, q] * SELL_PRICE_PER_KILOLITRE)
+    for j in J for q in Q
+) - quicksum(
+    T[f, q] * TRUCK_LOAD_SIZE * Cost[f] 
+    for f in F for q in Q
+)
+
+m.setObjective(profit_function, GRB.MAXIMIZE)
+
+DoNotExceedFruitTruckDelivery = {
+    (f, q): m.addConstr(
+        quicksum(X[j, q] * Blend[j][f] for j in J) <= T[f, q] * TRUCK_LOAD_SIZE
+    )
+    for f in F for q in Q
+}
+
+m.optimize()
+print_vars("Communication 5")
