@@ -30,7 +30,7 @@ SELL_PRICE_PER_KILOLITRE = 1.50 * 1000
 TRUCK_LOAD_SIZE = 10
 
 # Quarter   Brisbane
-brisbane_fcoj_supply_table = """
+BRISBANE_FCOJ_SUPPLY_TABLE = """
 Q1	1800
 Q2	2100
 Q3	2500
@@ -41,7 +41,7 @@ Q7	2600
 Q8	2700
 """
 
-blend_table = """
+JUICE_TABLE = """
 Orange Juice	100% Orange
 Orange and Mango Juice	90% Orange, 10% Mango
 Breakfast Juice	55% Apple, 28% Pineapple, 15% Orange, 2% Mango
@@ -51,8 +51,10 @@ Orchard Medley	50% Apple, 45% Orange, 5% Mango
 Strawberry Surprise	90% Apple, 8% Strawberry, 2% Guava
 """
 
+GOURMET_JUICES = [ "Guava Delight", "Orchard Medley",  "Strawberry Surprise" ] 
+
 # Fruit	Cost ($/kL)
-cost_table = """
+COST_TABLE = """
 Apple	620
 Mango	1300
 Pineapple	800
@@ -62,7 +64,7 @@ Strawberry	1370
 """ + "Orange	{}".format(ORANGE_JUICE_COST)
 
 # Q1	Q2	Q3	Q4	Q5	Q6	Q7	Q8
-demand_table = """
+DEMAND_TABLE = """
 973	872	1206	981	781	1055	1420	1236
 311	347	469	389	329	363	484	568
 682	707	838	938	586	788	1141	988
@@ -76,10 +78,10 @@ demand_table = """
 # SETS #
 ########
 
-Juice = [ row[0] for row in tabulate(blend_table) ]
+Juice = [ row[0] for row in tabulate(JUICE_TABLE) ]
 J = range(len(Juice))
 
-Fruit = [ row[0] for row in tabulate(cost_table) ]
+Fruit = [ row[0] for row in tabulate(COST_TABLE) ]
 F = range(len(Fruit))
 
 Quarter = [ "Q" + str(i) for i in range(1, 9) ]
@@ -111,13 +113,15 @@ def make_blend(cell):
 def get_blend_price(parts):
     return sum(parts[f] * Cost[f] for f in F)
 
-Blend = [ make_blend(row[1]) for row in tabulate(blend_table) ]
+Blend = [ make_blend(row[1]) for row in tabulate(JUICE_TABLE) ]
 
-Cost = [ int(row[1]) for row in tabulate(cost_table) ]
+Cost = [ int(row[1]) for row in tabulate(COST_TABLE) ]
 
-Demand = [ [ int(i) for i in row ] for row in tabulate(demand_table) ]
+Demand = [ [ int(i) for i in row ] for row in tabulate(DEMAND_TABLE) ]
 
-BrisbaneFCOJSupply = [ int(row[1]) for row in tabulate(brisbane_fcoj_supply_table) ]
+BrisbaneFCOJSupply = [ int(row[1]) for row in tabulate(BRISBANE_FCOJ_SUPPLY_TABLE) ]
+
+Gourmet = [ 1 if Juice[j] in GOURMET_JUICES else 0 for j in J ]
 
 #############
 # VARIABLES #
@@ -126,10 +130,6 @@ BrisbaneFCOJSupply = [ int(row[1]) for row in tabulate(brisbane_fcoj_supply_tabl
 # make a variable representing the number of kL of a certain juice produced per quarter
 # TODO: TYPE
 X = { (j, q): m.addVar() for j in J for q in Q }
-
-# make a variable representing the number of trucks delivering a certain fruit per quarter
-# TODO: TYPE
-T = { (f, q): m.addVar(vtype=GRB.INTEGER) for f in F for q in Q }
 
 #############
 # OBJECTIVE #
@@ -180,6 +180,10 @@ assert(round(m.objVal) == 26240836)
 
 #-----------------------------------------------------------------------------#
 
+# make a variable representing the number of trucks delivering a certain fruit per quarter
+# TODO: TYPE
+T = { (f, q): m.addVar(vtype=GRB.INTEGER) for f in F for q in Q }
+
 profit_function = quicksum(
     (X[j, q] * SELL_PRICE_PER_KILOLITRE)
     for j in J for q in Q
@@ -203,3 +207,26 @@ DoNotExceedFruitTruckDelivery = {
 m.optimize()
 print_vars("Communication 5")
 assert(round(m.objVal) == 26065453)
+
+#-----------------------------------------------------------------------------#
+
+G = { (j, q): m.addVar(vtype=GRB.BINARY) for j in J for q in Q  }
+
+GourmetLatch = {
+    q: m.addConstr(
+        # if the juice is gourmet, and it's being used, it consumes a spot
+        quicksum(Gourmet[j] and G[j, q] for j in J) == 2
+    )
+    for q in Q
+}
+
+OnlyTwoGourmet = {
+    (j, q): m.addConstr(
+        G[j, q] * X[j, q] == X[j, q] # essentially `if G then X else 0` 
+    )
+    for j in J for q in Q
+}
+
+m.optimize()
+print_vars("Communication 6")
+assert(round(m.objVal) == 23426440)
