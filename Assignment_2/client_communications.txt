@@ -48,3 +48,34 @@ Communication 6
 Due to staffing difficulties in manufacturing our gourmet juices (Guava Delight, Orchard Medley, and Strawberry Surprise) we would like to only produce two of these juices each quarter. Could you revise your blending schedule accordingly?
 
 Please provide us with the revised optimal profit from producing our juice range over the next eight quarters:
+
+$23426440
+
+Communication 7
+We have realised it is not desirable to have a gourmet juice out of production for more than one quarter in a row. Could you revise your blending schedule accordingly?
+
+Please provide us with the revised optimal profit from producing our juice range over the next eight quarters:
+
+$23206548
+
+Thank you for your help in planning our production schedule. Based on the excellent profits you have achieved for us, we are now looking at taking more direct control of our deliveries.
+
+Below you will find a map showing the proposed location of our main depot for Brisbane and ten of the locations where we will need to deliver each day.
+
+
+We have estimated the following travel costs ($) between each pair of locations:
+
+D	1	2	3	4	5	6	7	8	9	10
+D	—	68	222	117	102	71	131	133	146	166	16
+1	68	—	269	98	144	138	198	180	214	231	79
+2	222	269	—	215	125	173	145	90	163	114	205
+3	117	98	215	—	106	156	203	139	226	221	113
+4	102	144	125	106	—	82	107	37	132	117	86
+5	71	138	173	156	82	—	60	95	76	97	60
+6	131	198	145	203	107	60	—	97	25	42	119
+7	133	180	90	139	37	95	97	—	122	94	117
+8	146	214	163	226	132	76	25	122	—	51	136
+9	166	231	114	221	117	97	42	94	51	—	153
+10	16	79	205	113	86	60	119	117	136	153	—
+
+Please provide us with the minimum cost for travelling from the depot to visit each of the locations and then return to the depot:

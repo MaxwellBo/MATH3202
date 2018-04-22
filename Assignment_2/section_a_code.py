@@ -196,6 +196,7 @@ profit_function = quicksum(
 )
 
 m.setObjective(profit_function, GRB.MAXIMIZE)
+m.setParam("MIPGap", 0)
 
 DoNotExceedFruitTruckDelivery = {
     (f, q): m.addConstr(
@@ -212,7 +213,7 @@ assert(round(m.objVal) == 26065453)
 
 G = { (j, q): m.addVar(vtype=GRB.BINARY) for j in J for q in Q  }
 
-GourmetLatch = {
+LimitOfTwoGourmetProduced = {
     q: m.addConstr(
         # if the juice is gourmet, and it's being used, it consumes a spot
         quicksum(Gourmet[j] and G[j, q] for j in J) == 2
@@ -220,7 +221,7 @@ GourmetLatch = {
     for q in Q
 }
 
-OnlyTwoGourmet = {
+PreventThirdGourmetProduction = {
     (j, q): m.addConstr(
         G[j, q] * X[j, q] == X[j, q] # essentially `if G then X else 0` 
     )
@@ -230,3 +231,17 @@ OnlyTwoGourmet = {
 m.optimize()
 print_vars("Communication 6")
 assert(round(m.objVal) == 23426440)
+
+#-----------------------------------------------------------------------------#
+
+ProduceOnePerTwoQuarters = {
+    (j, q): m.addConstr(
+        # HACK
+        G[j, q] + G[j, q + 1] >= 1
+    )
+    for j in J for q in Q[:-1]
+}
+
+m.optimize()
+print_vars("Communication 7")
+assert(round(m.objVal) == 23206548)
