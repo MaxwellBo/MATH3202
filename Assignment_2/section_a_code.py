@@ -18,15 +18,15 @@ def tabulate(xy):
 # CONSTANTS #
 #############
 
-# Thanks to your previous work, the average cost of reconstituted orange juice is $974 per thousand litres (kL).
+# "the average cost of reconstituted orange juice is $974 per thousand litres (kL)."
 ORANGE_JUICE_COST = 974
 
-# We sell all juice produced for $1.50 per litre
+# "We sell all juice produced for $1.50 per litre"
 SELL_PRICE_PER_LITRE = 1.50
 SELL_PRICE_PER_KILOLITRE = 1.50 * 1000
 
-# delivery trucks must always bring full loads of a single local fruit, 
-# equivalent to 10 kL of processed juice per truck
+# "delivery trucks must always bring full loads of a single local fruit, 
+# equivalent to 10 kL of processed juice per truck"
 TRUCK_LOAD_SIZE = 10
 
 # Quarter   Brisbane
@@ -164,18 +164,17 @@ DoNotExceedBrisbaneFCOJSupply = {
 
 #------------------------------------------------------------------------------#
 
-def print_vars(communication):
-
+def print_vars(model, communication):
     print()
     print(communication)
     print()
-    print("Optimal cost: ${:,}".format(m.objVal))
+    print("Optimal cost: ${:,}".format(model.objVal))
     print()
 
 #------------------------------------------------------------------------------#
 
 m.optimize()
-print_vars("Communication 4")
+print_vars(m, "Communication 4")
 assert(round(m.objVal) == 26240836)
 
 #-----------------------------------------------------------------------------#
@@ -206,7 +205,7 @@ DoNotExceedFruitTruckDelivery = {
 }
 
 m.optimize()
-print_vars("Communication 5")
+print_vars(m, "Communication 5")
 assert(round(m.objVal) == 26065453)
 
 #-----------------------------------------------------------------------------#
@@ -229,19 +228,98 @@ PreventThirdGourmetProduction = {
 }
 
 m.optimize()
-print_vars("Communication 6")
+print_vars(m, "Communication 6")
 assert(round(m.objVal) == 23426440)
 
 #-----------------------------------------------------------------------------#
 
 ProduceOnePerTwoQuarters = {
     (j, q): m.addConstr(
-        # HACK
         G[j, q] + G[j, q + 1] >= 1
     )
     for j in J for q in Q[:-1]
 }
 
 m.optimize()
-print_vars("Communication 7")
+print_vars(m, "Communication 7")
 assert(round(m.objVal) == 23206548)
+
+#-----------------------------------------------------------------------------#
+
+n = Model("Pure Fresh")
+
+#############
+# CONSTANTS #
+#############
+
+TRAVEL_COST_TABLE =  """
+    D	1	2	3	4	5	6	7	8	9	10
+D	—	68	222	117	102	71	131	133	146	166	16
+1	68	—	269	98	144	138	198	180	214	231	79
+2	222	269	—	215	125	173	145	90	163	114	205
+3	117	98	215	—	106	156	203	139	226	221	113
+4	102	144	125	106	—	82	107	37	132	117	86
+5	71	138	173	156	82	—	60	95	76	97	60
+6	131	198	145	203	107	60	—	97	25	42	119
+7	133	180	90	139	37	95	97	—	122	94	117
+8	146	214	163	226	132	76	25	122	—	51	136
+9	166	231	114	221	117	97	42	94	51	—	153
+10	16	79	205	113	86	60	119	117	136	153	—
+"""
+
+########
+# SETS #
+########
+
+Location = tabulate(TRAVEL_COST_TABLE)[0]
+L = range(len(Location))
+
+########
+# DATA #
+########
+
+def parse_cell(x): return sys.maxsize if x == '—' else int(x)
+
+Cost = [ [ parse_cell(col) for col in row[1:] ] for row in tabulate(TRAVEL_COST_TABLE)[1:] ]
+
+#############
+# VARIABLES #
+#############
+
+# from, to
+T = { (f, t): n.addVar(vtype=GRB.BINARY) for f in L for t in L }
+
+#############
+# OBJECTIVE #
+#############
+
+cost_function = quicksum(
+    T[f, t] * Cost[f][t]
+    for f in L for t in L
+)
+
+n.setObjective(cost_function, GRB.MINIMIZE)
+
+###############
+# CONSTRAINTS #
+###############
+
+DepartFromEachLocationOnce = {
+    t: n.addConstr(
+        quicksum(T[f, t] for f in L) == 1
+    )
+    for t in L
+}
+
+ArriveAtEachLocationOnce = {
+    f: n.addConstr(
+        quicksum(T[f, t] for t in L) == 1
+    )
+    for f in L
+}
+
+n.optimize()
+print_vars(n, "Communication 8")
+
+for f in L:
+    print(' '.join("{}->{}".format(f, t) if int(T[f, t].x) else '     ' for t in L))
