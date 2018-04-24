@@ -1,0 +1,69 @@
+\documentclass[a4paper]{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\usepackage[
+top=0.3in, % was 0.7
+% bottom=1in, % was 0.55
+nohead]{geometry}
+
+\title{MATH3202 - Linear Programming - Section A}
+\author{Maxwell Bo  \and Chantel Morris}
+
+\begin{document} 
+
+\maketitle
+
+\section*{Sets}
+
+\begin{tabular}{rl}
+    $C$ & Set of cities\\
+    $Q$ & Set of quarters
+\end{tabular}
+
+\section*{Data}
+
+\begin{tabular}{rl}
+%  \footnote{$i$ for initial}
+%  \footnote{$m$ for maxiumum}
+    $i_c$ & Current number of barrels in city $c \in C$\\
+    $d_{cq}$ & Predicted demand of barrels in city $c \in C$ for quarter $q \in Q$\\
+    $c_q$ & Predicted cost of dollars per barrel for quarter $q \in Q$\\
+    $m_c$ & Maximum storage capacity of barrels in city $c \in C$
+\end{tabular}
+
+\section*{Variables}
+
+\begin{tabular}{rl}
+    $x_{cq}$ & Number of barrels to deliver to city $c \in C$ in quarter $q \in Q$\\
+    $s_{cq}$ & Number of barrels to store in city $c \in C$ at the end of quarter $q \in Q$\\
+\end{tabular}
+
+\section*{Objective}
+
+\[
+\text{min} \sum_{c \in C}\sum_{q \in Q} 25 s_{cq} +\: c_q x_{cq}
+\]
+
+\section*{Constraints}
+
+\begin{align}
+x_{cq} & \geq 0 & \forall c \in C,\  \forall q \in Q \label{C1}\\
+s_{cq} & \geq 0 & \forall c \in C,\  \forall q \in Q \label{C2}\\
+\sum_{c \in C} x_{cq} & \leq 10000 & \forall q \in Q \label{C3}\\
+i_{c} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in \{ f \} \label{C4}\\
+s_{c(q - 1)} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in Q \setminus \{ f \} \label{C5}\\
+s_{cl} & \geq 3000 & \forall c \in C \label{C6}\\
+s_{cq} & \leq m_c & \forall c \in C,\  \forall q \in Q \label{C7}
+\end{align}
+
+where $f$ is the first quarter, and $l$ is the last quarter, where $f, l \in Q$.
+\begin{itemize}
+    \item Constraints (\ref{C1}) and (\ref{C2}) are basic non-negativity constraints on our variables. 
+    \item Constraints (\ref{C3}) ensures that the amount shipped per quarter does not exceed the ships capacity.
+    \item Constraints (\ref{C4}) and (\ref{C5}) describe a recursive relationship between initial supplies, new deliveries, demand, and the amount stored at the end of each quarter.
+    \item Constarint (\ref{C6}) ensures that there at least 3000 barrels in storage in each port by the end of the last quarter.
+    \item Constarint (\ref{C7}) ensures that we do not exceed the capacities of our facilities in each port.
+\end{itemize}
+\end{document}
