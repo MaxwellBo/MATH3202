@@ -318,6 +318,13 @@ ArriveAtEachLocationOnce = {
     for f in L
 }
 
+NoTwoLocationLoops = {
+    (f, t): n.addConstr(
+        T[f, t] + T[t, f] <= 1
+    )
+    for f in L for t in L
+}
+
 n.optimize()
 print_vars(n, "Communication 8")
 

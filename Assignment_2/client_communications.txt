@@ -79,3 +79,7 @@ D	—	68	222	117	102	71	131	133	146	166	16
 10	16	79	205	113	86	60	119	117	136	153	—
 
 Please provide us with the minimum cost for travelling from the depot to visit each of the locations and then return to the depot:
+
+$725
+
+Thank you for your estimate. We look forward to reading your final report.
