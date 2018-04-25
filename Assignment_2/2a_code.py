@@ -7,12 +7,17 @@ from collections import namedtuple
 
 m = Model("Pure Fresh")
 
+m.setParam('OutputFlag', 0) # TODO REMOVE
+
 #########
 # UTILS #
 #########
 
 def tabulate(xy):
     return [ row.split('\t') for row in xy.strip().split('\n') ]
+
+def make_column_format_string(n):
+    return " ".join(["{:>12}"] * n)
 
 #############
 # CONSTANTS #
@@ -82,7 +87,9 @@ Juice = [ row[0] for row in tabulate(JUICE_TABLE) ]
 J = range(len(Juice))
 
 Fruit = [ row[0] for row in tabulate(COST_TABLE) ]
+DeliverableFruit = Fruit[:-1] # to drop Orange
 F = range(len(Fruit))
+DF = range(len(DeliverableFruit))
 
 Quarter = [ "Q" + str(i) for i in range(1, 9) ]
 Q = range(len(Quarter))
@@ -161,17 +168,48 @@ DoNotExceedBrisbaneFCOJSupply = {
 
 #------------------------------------------------------------------------------#
 
-def print_vars(model, communication):
+def print_cost(communication, model):
     print()
     print(communication)
     print()
     print("Optimal cost: ${:,}".format(model.objVal))
     print()
 
+
+def print_header(variable, col_headers):
+    cols = make_column_format_string(len(col_headers) + 1)
+
+    print()
+    print(variable)
+    print()
+    print(cols.format("Quarter", *[i[:10] for i in col_headers]))
+
+    return cols
+
+def print_production():
+    cols = print_header("Production", Juice)
+
+    for q in Q:
+        print(cols.format(Quarter[q], *[int(X[j, q].x) for j in J]))
+
+def print_trucks():
+    cols = print_header("Trucks", DeliverableFruit)
+
+    for q in Q:
+        print(cols.format(Quarter[q], *[int(T[f, q].x) for f in F]))
+
+def print_gourmet_choice():
+    cols = print_header("Gourmet Choice", GOURMET_JUICES)
+
+    for q in Q:
+        print(cols.format(Quarter[q], *[int(G[j, q].x) for j in J if Gourmet[j]]))
+
+
 #------------------------------------------------------------------------------#
 
 m.optimize()
-print_vars(m, "Communication 4")
+print_cost("Communication 4", m)
+print_production()
 assert(round(m.objVal) == 26240836)
 
 #-----------------------------------------------------------------------------#
@@ -185,7 +223,7 @@ profit_function = quicksum(
     for j in J for q in Q
 ) - quicksum(
     T[f, q] * TRUCK_LOAD_SIZE * Cost[f]
-    for f in F[:-1] for q in Q
+    for f in DF for q in Q
 ) - quicksum(
     X[j, q] * Blend[j].Orange * ORANGE_JUICE_COST
     for j in J for q in Q
@@ -198,11 +236,13 @@ DoNotExceedFruitTruckDelivery = {
     (f, q): m.addConstr(
         quicksum(X[j, q] * Blend[j][f] for j in J) <= T[f, q] * TRUCK_LOAD_SIZE
     )
-    for f in F[:-1] for q in Q
+    for f in DF for q in Q
 }
 
 m.optimize()
-print_vars(m, "Communication 5")
+print_cost("Communication 5", m)
+print_production()
+print_trucks()
 assert(round(m.objVal) == 26065453)
 
 #-----------------------------------------------------------------------------#
@@ -225,7 +265,10 @@ PreventThirdGourmetProduction = {
 }
 
 m.optimize()
-print_vars(m, "Communication 6")
+print_cost("Communication 6", m)
+print_production()
+print_trucks()
+print_gourmet_choice()
 assert(round(m.objVal) == 23426440)
 
 #-----------------------------------------------------------------------------#
@@ -238,12 +281,17 @@ ProduceOnePerTwoQuarters = {
 }
 
 m.optimize()
-print_vars(m, "Communication 7")
+print_cost("Communication 7", m)
+print_production()
+print_trucks()
+print_gourmet_choice()
 assert(round(m.objVal) == 23206548)
 
 #-----------------------------------------------------------------------------#
 
 n = Model("Pure Fresh")
+
+n.setParam('OutputFlag', 0) # TODO REMOVE
 
 #############
 # CONSTANTS #
@@ -322,9 +370,11 @@ NoTwoLocationLoops = {
     for f in L for t in L
 }
 
-n.optimize()
-print_vars(n, "Communication 8")
-assert(n.objVal == 725)
+def print_path():
+    for f in L:
+        print(' '.join("{}->{}".format(f, t) if int(T[f, t].x) else '     ' for t in L))
 
-for f in L:
-    print(' '.join("{}->{}".format(f, t) if int(T[f, t].x) else '     ' for t in L))
+n.optimize()
+print_cost("Communication 8", n)
+print_path()
+assert(n.objVal == 725)
