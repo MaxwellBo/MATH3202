@@ -17,7 +17,7 @@ def tabulate(xy):
     return [ row.split('\t') for row in xy.strip().split('\n') ]
 
 def make_column_format_string(n):
-    return " ".join(["{:>12}"] * n)
+    return 
 
 #############
 # CONSTANTS #
@@ -170,39 +170,40 @@ DoNotExceedBrisbaneFCOJSupply = {
 
 def print_cost(communication, model):
     print()
+    print()
     print(communication)
     print()
     print("Optimal cost: ${:,}".format(model.objVal))
-    print()
 
 
-def print_header(variable, col_headers):
-    cols = make_column_format_string(len(col_headers) + 1)
+def print_header(variable):
+    cols = "{:>22} " + " ".join(["{:>6}"] * len(Quarter))
 
     print()
     print(variable)
     print()
-    print(cols.format("Quarter", *[i[:10] for i in col_headers]))
+    print(cols.format("Quarter", *Quarter))
 
     return cols
 
 def print_production():
-    cols = print_header("Production", Juice)
+    cols = print_header("Production")
 
-    for q in Q:
-        print(cols.format(Quarter[q], *[int(X[j, q].x) for j in J]))
+    for j in J:
+        print(cols.format(Juice[j], *[int(X[j, q].x) for q in Q]))
 
 def print_trucks():
-    cols = print_header("Trucks", DeliverableFruit)
+    cols = print_header("Trucks")
 
-    for q in Q:
-        print(cols.format(Quarter[q], *[int(T[f, q].x) for f in F]))
+    for f in DF:
+        print(cols.format(Fruit[f], *[int(T[f, q].x) for q in Q]))
 
 def print_gourmet_choice():
-    cols = print_header("Gourmet Choice", GOURMET_JUICES)
+    cols = print_header("Gourmet Choice")
 
-    for q in Q:
-        print(cols.format(Quarter[q], *[int(G[j, q].x) for j in J if Gourmet[j]]))
+    for j in J:
+        if Gourmet[j]:
+            print(cols.format(Juice[j], *[int(G[j, q].x) for q in Q]))
 
 
 #------------------------------------------------------------------------------#
@@ -290,7 +291,6 @@ assert(round(m.objVal) == 23206548)
 #-----------------------------------------------------------------------------#
 
 n = Model("Pure Fresh")
-
 n.setParam('OutputFlag', 0) # TODO REMOVE
 
 #############
