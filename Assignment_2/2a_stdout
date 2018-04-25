@@ -7,7 +7,7 @@ Optimal cost: $26,240,835.759999998
 
 Production
 
-               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
           Orange Juice    880    872   1206    981    781   1055   1420   1236
 Orange and Mango Juice    311    347    469    389    329    363    484    568
        Breakfast Juice    682    707    838    938    586    788   1141    988
@@ -23,7 +23,7 @@ Optimal cost: $26,065,452.957523815
 
 Production
 
-               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
           Orange Juice    900    872   1206    981    781   1055   1420   1236
 Orange and Mango Juice    289    347    469    389    316    363    484    568
        Breakfast Juice    672    707    838    938    586    788   1141    988
@@ -34,7 +34,7 @@ Orange and Mango Juice    289    347    469    389    316    363    484    568
 
 Trucks
 
-               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
                  Apple    210    211    217    213    200    211    214    221
                  Mango     10      8     10     11     10      9     10     12
              Pineapple     37     42     51     53     33     43     57     55
@@ -49,7 +49,7 @@ Optimal cost: $23,426,440.25449524
 
 Production
 
-               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
           Orange Juice    900    872   1206    981    781   1055   1420   1236
 Orange and Mango Juice    291    347    469    389    316    363    484    568
        Breakfast Juice    682    707    838    938    586    787   1141    986
@@ -60,7 +60,7 @@ Orange and Mango Juice    291    347    469    389    316    363    484    568
 
 Trucks
 
-               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
                  Apple    183    175    175    177    178    176    177    190
                  Mango     10      8     10     11     10      9     10     12
              Pineapple     34     38     50     53     30     38     57     51
@@ -70,7 +70,7 @@ Trucks
 
 Gourmet Choice
 
-               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
          Guava Delight      0      0      1      1      0      0      1      0
         Orchard Medley      1      1      1      1      1      1      1      1
    Strawberry Surprise      1      1      0      0      1      1      0      1
@@ -82,7 +82,7 @@ Optimal cost: $23,206,547.647142857
 
 Production
 
-               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
           Orange Juice    900    872   1206    981    781   1055   1420   1236
 Orange and Mango Juice    291    347    469    389    316    342    484    568
        Breakfast Juice    682    707    829    938    586    788   1141    986
@@ -93,7 +93,7 @@ Orange and Mango Juice    291    347    469    389    316    342    484    568
 
 Trucks
 
-               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
                  Apple    183    180    170    177    178    181    177    190
                  Mango     10      5     10     11     10      5     10     12
              Pineapple     34     42     44     53     30     43     57     51
@@ -103,7 +103,7 @@ Trucks
 
 Gourmet Choice
 
-               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
          Guava Delight      0      1      0      1      0      1      1      0
         Orchard Medley      1      0      1      1      1      0      1      1
    Strawberry Surprise      1      1      1      0      1      1      0      1

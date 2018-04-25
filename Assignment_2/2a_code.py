@@ -178,7 +178,7 @@ def print_header(variable):
     print()
     print(variable)
     print()
-    print(cols.format("Quarter", *Quarter))
+    print(cols.format("", *Quarter))
 
     return cols
 
