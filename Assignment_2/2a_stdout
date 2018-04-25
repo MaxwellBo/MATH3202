@@ -1,0 +1,125 @@
+Academic license - for non-commercial use only
+
+
+Communication 4
+
+Optimal cost: $26,240,835.759999998
+
+Production
+
+               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+          Orange Juice    880    872   1206    981    781   1055   1420   1236
+Orange and Mango Juice    311    347    469    389    329    363    484    568
+       Breakfast Juice    682    707    838    938    586    788   1141    988
+        Tropical Juice    492    586    726    739    450    549    645    779
+         Guava Delight    340    459    593    393    276    424    559    389
+        Orchard Medley   1151    621    697    909   1133    615    542    865
+   Strawberry Surprise    625    740    468    409    665    750    411    464
+
+
+Communication 5
+
+Optimal cost: $26,065,452.957523815
+
+Production
+
+               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+          Orange Juice    900    872   1206    981    781   1055   1420   1236
+Orange and Mango Juice    289    347    469    389    316    363    484    568
+       Breakfast Juice    672    707    838    938    586    788   1141    988
+        Tropical Juice    492    586    720    738    450    549    645    779
+         Guava Delight    340    452    593    393    276    424    559    389
+        Orchard Medley   1151    621    697    909   1131    615    542    865
+   Strawberry Surprise    625    740    464    405    665    747    411    462
+
+Trucks
+
+               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                 Apple    210    211    217    213    200    211    214    221
+                 Mango     10      8     10     11     10      9     10     12
+             Pineapple     37     42     51     53     33     43     57     55
+          Passionfruit      1      1      1      1      1      1      1      1
+                 Guava      5      6      7      5      5      6      7      5
+            Strawberry      5      6      4      4      6      6      4      4
+
+
+Communication 6
+
+Optimal cost: $23,426,440.25449524
+
+Production
+
+               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+          Orange Juice    900    872   1206    981    781   1055   1420   1236
+Orange and Mango Juice    291    347    469    389    316    363    484    568
+       Breakfast Juice    682    707    838    938    586    787   1141    986
+        Tropical Juice    492    586    721    739    450    549    645    779
+         Guava Delight      0      0    589    393      0      0    559      0
+        Orchard Medley   1145    621    697    909   1133    615    542    865
+   Strawberry Surprise    625    740      0      0    665    746      0    464
+
+Trucks
+
+               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                 Apple    183    175    175    177    178    176    177    190
+                 Mango     10      8     10     11     10      9     10     12
+             Pineapple     34     38     50     53     30     38     57     51
+          Passionfruit      1      1      1      1      1      1      1      1
+                 Guava      2      2      6      4      2      2      6      1
+            Strawberry      5      6      0      0      5      6      0      4
+
+Gourmet Choice
+
+               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+         Guava Delight      0      0      1      1      0      0      1      0
+        Orchard Medley      1      1      1      1      1      1      1      1
+   Strawberry Surprise      1      1      0      0      1      1      0      1
+
+
+Communication 7
+
+Optimal cost: $23,206,547.647142857
+
+Production
+
+               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+          Orange Juice    900    872   1206    981    781   1055   1420   1236
+Orange and Mango Juice    291    347    469    389    316    342    484    568
+       Breakfast Juice    682    707    829    938    586    788   1141    986
+        Tropical Juice    492    586    726    739    450    549    645    779
+         Guava Delight      0    452      0    393      0    424    559      0
+        Orchard Medley   1145      0    697    909   1133      0    542    865
+   Strawberry Surprise    625    740    468      0    665    750      0    464
+
+Trucks
+
+               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                 Apple    183    180    170    177    178    181    177    190
+                 Mango     10      5     10     11     10      5     10     12
+             Pineapple     34     42     44     53     30     43     57     51
+          Passionfruit      1      1      1      1      1      1      1      1
+                 Guava      2      6      1      4      2      6      6      1
+            Strawberry      5      6      4      0      6      6      0      4
+
+Gourmet Choice
+
+               Quarter     Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+         Guava Delight      0      1      0      1      0      1      1      0
+        Orchard Medley      1      0      1      1      1      0      1      1
+   Strawberry Surprise      1      1      1      0      1      1      0      1
+
+
+Communication 8
+
+Optimal cost: $725.0
+      0->1                                                      
+                  1->3                                          
+                                                      2->9      
+                        3->4                                    
+                                          4->7                  
+                                                            5->10
+                              6->5                              
+            7->2                                                
+                                    8->6                        
+                                                9->8            
+10->0                                                            

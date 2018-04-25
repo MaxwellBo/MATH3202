@@ -6,7 +6,6 @@ from gurobipy import *
 from collections import namedtuple
 
 m = Model("Pure Fresh")
-
 m.setParam('OutputFlag', 0) # TODO REMOVE
 
 #########
@@ -15,9 +14,6 @@ m.setParam('OutputFlag', 0) # TODO REMOVE
 
 def tabulate(xy):
     return [ row.split('\t') for row in xy.strip().split('\n') ]
-
-def make_column_format_string(n):
-    return 
 
 #############
 # CONSTANTS #
