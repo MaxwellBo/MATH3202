@@ -8,7 +8,7 @@ top=0.3in, % was 0.7
 % bottom=1in, % was 0.55
 nohead]{geometry}
 
-\title{MATH3202 - Linear Programming - Section A}
+\title{MATH3202 - Integer Programming - Section A}
 \author{Maxwell Bo  \and Chantel Morris}
 
 \begin{document} 
@@ -18,38 +18,39 @@ nohead]{geometry}
 \section*{Sets}
 
 \begin{tabular}{rl}
-    $C$ & Set of cities\\
-    $Q$ & Set of quarters
+    $J$ & Set of juices\\
+    $F$ & Set of types of fruit\\
+    $Q$ & Set of quarters\\
 \end{tabular}
 
 \section*{Data}
 
 \begin{tabular}{rl}
-%  \footnote{$i$ for initial}
-%  \footnote{$m$ for maxiumum}
-    $i_c$ & Current number of barrels in city $c \in C$\\
-    $d_{cq}$ & Predicted demand of barrels in city $c \in C$ for quarter $q \in Q$\\
-    $c_q$ & Predicted cost of dollars per barrel for quarter $q \in Q$\\
-    $m_c$ & Maximum storage capacity of barrels in city $c \in C$
+    $b_{jf}$ & Fraction (?) $\in [0, 1]$ of fruit $f \in F$ in juice $j \in J$\\
+    $c_{f}$ & Cost (\$/kL) of local fruit $f \in F$\\
+    $d_{jq}$ & Anticipated ability to sell kL of juice $j \in J$ in quarter $q \in Q$\\
+    $b_{q}$ & Demand of kL of orange juice in Brisbane in quarter $q \in Q$\\
+    $g_{j}$ & Whether a juice $j \in J$ is gourmet\\
+    $s$ & Sell price (\$/kL) of any juice
 \end{tabular}
 
 \section*{Variables}
 
 \begin{tabular}{rl}
-    $x_{cq}$ & Number of barrels to deliver to city $c \in C$ in quarter $q \in Q$\\
-    $s_{cq}$ & Number of barrels to store in city $c \in C$ at the end of quarter $q \in Q$\\
+    $x_{jq}$ & Number of kL of juice $j \in J$ produced in quarter $q \in Q$\\
+    $t_{fq}$ & ???
 \end{tabular}
 
-\section*{Objective}
+\section*{Objectives}
 
 \[
-\text{min} \sum_{c \in C}\sum_{q \in Q} 25 s_{cq} +\: c_q x_{cq}
+\text{max} \sum_{j \in J}\sum_{q \in Q} (s \cdot x_{jq} -\: (\sum_{f \in F} b_{jf} \cdot c_f) \cdot x_{jq})
 \]
 
 \section*{Constraints}
 
 \begin{align}
-x_{cq} & \geq 0 & \forall c \in C,\  \forall q \in Q \label{C1}\\
+x_{jq} & \geq 0 & \forall j \in J,\  \forall q \in Q \label{C1}\\
 s_{cq} & \geq 0 & \forall c \in C,\  \forall q \in Q \label{C2}\\
 \sum_{c \in C} x_{cq} & \leq 10000 & \forall q \in Q \label{C3}\\
 i_{c} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in \{ f \} \label{C4}\\

@@ -110,9 +110,6 @@ def make_blend(cell):
 
     return Parts(**{**defaults, **overrides}) # bigg splatt
 
-def get_blend_price(parts):
-    return sum(parts[f] * Cost[f] for f in F)
-
 Blend = [ make_blend(row[1]) for row in tabulate(JUICE_TABLE) ]
 
 Cost = [ int(row[1]) for row in tabulate(COST_TABLE) ]
@@ -136,9 +133,9 @@ X = { (j, q): m.addVar() for j in J for q in Q }
 #############
 
 profit_function = quicksum(
-    (X[j, q] * SELL_PRICE_PER_KILOLITRE)
+    (SELL_PRICE_PER_KILOLITRE * X[j, q])
     -
-    (X[j, q] * get_blend_price(Blend[j]))
+    (sum(Blend[j][f] * Cost[f] for f in F) * X[j, q])
     for j in J for q in Q
 )
 
@@ -327,6 +324,7 @@ NoTwoLocationLoops = {
 
 n.optimize()
 print_vars(n, "Communication 8")
+assert(n.objVal == 725)
 
 for f in L:
     print(' '.join("{}->{}".format(f, t) if int(T[f, t].x) else '     ' for t in L))
