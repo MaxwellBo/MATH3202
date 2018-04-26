@@ -294,11 +294,11 @@ assert(round(m.objVal) == 23426440)
 
 #-----------------------------------------------------------------------------#
 
-ProduceOnePerTwoQuarters = {
+ProduceOneGourmetPerTwoQuarters = {
     (j, q): m.addConstr(
         G[j, q] + G[j, q + 1] >= 1
     )
-    for j in J for q in Q[:-1]
+    for j in J for q in Q[:-1] if Juice[j] in GourmetJuice
 }
 
 m.optimize()

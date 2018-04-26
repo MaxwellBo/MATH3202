@@ -5,11 +5,6 @@
 
 \newcommand{\SET}[1]{\{ {#1} \}}
 
-\usepackage[
-top=0.3in, % was 0.7
-% bottom=1in, % was 0.55
-nohead]{geometry}
-
 \title{MATH3202 - Integer Programming - Section A}
 \author{Maxwell Bo  \and Chantel Morris}
 
@@ -36,7 +31,8 @@ nohead]{geometry}
     $b_{q}$ & Demand of kL of orange juice in Brisbane in quarter $q \in Q$\\
     $g_{j}$ & Whether a juice $j \in J$ is gourmet, $g_{j}$ is $1$ if $g_{j}$ is gourmet\\
     $s$ & Sell price (\$/kL) of any juice $j \in J$\\
-    $l$ & Truck delivery size (kL) of any fruit $f \in F$
+    $l$ & Truck delivery size (kL) of any fruit $f \in F$\\
+    $r$ & Cost (\$/kL) of reconstituted orange juice
 \end{tabular}
 
 \section*{Variables}
@@ -50,8 +46,19 @@ nohead]{geometry}
 \section*{Objectives}
 
 \[
-\text{max} \sum_{j \in J}\sum_{q \in Q} (x_{jq} s -\: x_{jq} \cdot \left(\sum_{f \in F} b_{jf} \cdot c_f\right))
+\text{max} \sum_{j \in J}\sum_{q \in Q} \left(x_{jq} \cdot s -\: x_{jq} \cdot \left(\sum_{f \in F} b_{jf} \cdot c_f\right)\right)
 \]
+
+\[
+\text{max} 
+\left( \sum_{j \in J}\sum_{q \in Q} x_{jq} \cdot s \right) 
+-\: 
+\left( \sum_{f \in D}\sum_{q \in Q} t_{fq} \cdot l \cdot c_{f} \right) 
+-\: 
+\left( \sum_{j \in J}\sum_{q \in Q} x_{fq} \cdot p_{jo} \cdot r \right) 
+\]
+
+where $o \in F$, where $o$ represents Orange
 
 \section*{Constraints}
 
@@ -61,14 +68,64 @@ t_{fq} & \geq 0 & \forall f \in F,\  \forall q \in Q \label{C2}\\
 g_{jq} & \in \SET{0, 1} & \forall j \in J,\ \forall q \in Q \label{C3}\\
 x_{jq} & \leq d_{jq} & \forall j \in J,\ \forall q \in Q \label{C4}\\
 \sum_{j \in J} x_{jq} p_{jo} & \leq b_q & \forall q \in Q \label{C5}\\
-\sum_{j \in J}  x_{jq} p_{jf} & \leq t_{fq} l & \forall f \in D,\ \forall q \in Q \label{C5}\\
-\sum_{j \in G}  g_{jq} f_{jf} & \eq 2 & \forall f \in D,\ \forall q \in Q \label{C6}
+\sum_{j \in J}  x_{jq} p_{jf} & \leq t_{fq} l & \forall f \in D,\ \forall q \in Q \label{C6}\\
+\sum_{j \in G}  g_{jq} & = 2 & \forall q \in Q \label{C7}\\
+x_{jq} & \leq g_{jq}d_{jq} & \forall j \in G,\ \forall q \in Q \label{C8}\\
+g_{jq} + g_{j(next(q))} & \geq 1 & \forall j \in G,\ \forall q \in Q \setminus \SET{l}\label{C9}
 \end{align}
 
-where $o \in F$, where $o$ represents Orange.
+where $o \in F$, where $o$ represents Orange, where $l \in Q$, where $l$ is the last quarter, where $next$ yields the successive quarter for some $q \in Q \setminus \SET{l}$.
 
 \begin{itemize}
     \item Constraints (\ref{C1}) and (\ref{C2}) are basic non-negativity constraints on $x$ and $t$. 
     \item Constraint (\ref{C3}) ensures $g$ is a binary variable.
+    \item Constraint (\ref{C4}) ensures the production of juice does not exceed the anticipated ability to sell that juice
+    \item Constraint (\ref{C5}) ensures that the amount of orange juice is limited by the demand we noted for our original shipping schedule into Brisbane
+    \item Constraint (\ref{C6}) ensures that each quantity of juice is limited by the supply of its constituent fruits by trucks
+    \item Constraint (\ref{C7}) ensures that we only produce two gourmet juices each quarter
+    \item Constraint (\ref{C8}) binds our decision variable choosing which gourmet juice we choose to produce, by reiterating constraint (\ref{C4}) when production is enabled, and capping production at 0 when disabled
+    \item Constraint (\ref{C9}) ensures that no gourmet juice is out of production for more than one quarter in a row, by ensuring that adjacent quarters have at least 1 decision variable enabled
 \end{itemize}
+
+\newpage
+
+\section*{Sets}
+
+\begin{tabular}{rl}
+    $L$ & Set of locations
+\end{tabular}
+
+\section*{Data}
+
+\begin{tabular}{rl}
+    $c_{ft}$ & Cost (\$) of traveling from location $f \in L$ to location $t \in L$\\
+\end{tabular}
+
+\section*{Variables}
+
+\begin{tabular}{rl}
+    $t_{ft}$ & Decision to travel from location $f \in L$ to location $t \in L$
+\end{tabular}
+
+\section*{Objectives}
+
+\[
+\text{max} \sum_{f \in L} \sum_{t \in L} t_{ft} c_{ft}
+\]
+
+\section*{Constraints}
+
+\begin{align}
+\sum_{f \in L} t_{ft} & = 1 & \forall t \in L \label{C10}\\
+\sum_{t \in L} t_{ft} & = 1 & \forall f \in L \label{C11}\\
+t_{ft} +  t_{tf} & \leq 1 & \forall f \in L,\ \forall t \in L \label{C12}
+\end{align}
+
+\begin{itemize}
+    \item Constraint (\ref{C10}) ensures that each location is departed from only once
+    \item Constraint (\ref{C11}) ensures that each location is arrivated at only once
+    \item Constraint (\ref{C12}) ensures that there are no two location loops
+\end{itemize}
+
+
 \end{document}
