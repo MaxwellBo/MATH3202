@@ -28,7 +28,7 @@ SELL_PRICE_PER_KILOLITRE = 1.50 * 1000
 
 # "delivery trucks must always bring full loads of a single local fruit, 
 # equivalent to 10 kL of processed juice per truck"
-TRUCK_LOAD_SIZE = 10
+TRUCK_DELIVERY_SIZE = 10
 
 # Quarter   Brisbane
 BRISBANE_FCOJ_SUPPLY_TABLE = """
@@ -51,8 +51,6 @@ Guava Delight	80% Apple, 10% Pineapple, 10% Guava
 Orchard Medley	50% Apple, 45% Orange, 5% Mango
 Strawberry Surprise	90% Apple, 8% Strawberry, 2% Guava
 """
-
-GOURMET_JUICES = [ "Guava Delight", "Orchard Medley",  "Strawberry Surprise" ] 
 
 # Fruit	Cost ($/kL)
 COST_TABLE = """
@@ -82,10 +80,13 @@ DEMAND_TABLE = """
 Juice = [ row[0] for row in tabulate(JUICE_TABLE) ]
 J = range(len(Juice))
 
+GourmetJuice = [ "Guava Delight", "Orchard Medley",  "Strawberry Surprise" ] 
+
 Fruit = [ row[0] for row in tabulate(COST_TABLE) ]
-DeliverableFruit = Fruit[:-1] # We don't need to deliver oranges
 F = range(len(Fruit))
-DF = range(len(DeliverableFruit)) # TODO: UHHH?
+
+DeliverableFruit = Fruit[:-1] # We don't need to deliver oranges
+D = range(len(DeliverableFruit))
 
 Quarter = [ "Q" + str(i) for i in range(1, 9) ]
 Q = range(len(Quarter))
@@ -111,7 +112,7 @@ def make_blend(cell):
 
     return Parts(**{**defaults, **overrides}) # merge, then unpack
 
-Blend = [ make_blend(row[1]) for row in tabulate(JUICE_TABLE) ]
+Proportion = [ make_blend(row[1]) for row in tabulate(JUICE_TABLE) ]
 
 Cost = [ int(row[1]) for row in tabulate(COST_TABLE) ]
 
@@ -119,14 +120,11 @@ Demand = [ [ int(i) for i in row ] for row in tabulate(DEMAND_TABLE) ]
 
 BrisbaneFCOJSupply = [ int(row[1]) for row in tabulate(BRISBANE_FCOJ_SUPPLY_TABLE) ]
 
-Gourmet = [ 1 if Juice[j] in GOURMET_JUICES else 0 for j in J ]
-
 #############
 # VARIABLES #
 #############
 
 # make a variable representing the number of kL of a certain juice produced per quarter
-# TODO: TYPE
 X = { (j, q): m.addVar() for j in J for q in Q }
 
 #############
@@ -136,7 +134,7 @@ X = { (j, q): m.addVar() for j in J for q in Q }
 profit_function = quicksum(
     (X[j, q] * SELL_PRICE_PER_KILOLITRE)
     -
-    (X[j, q]* sum(Blend[j][f] * Cost[f] for f in F))
+    (X[j, q] * sum(Proportion[j][f] * Cost[f] for f in F))
     for j in J for q in Q
 )
 
@@ -155,7 +153,7 @@ DoNotExceedDemand = {
 
 DoNotExceedBrisbaneFCOJSupply = {
     q: m.addConstr(
-        quicksum(X[j, q] * Blend[j].Orange for j in J) <= BrisbaneFCOJSupply[q]
+        quicksum(X[j, q] * Proportion[j].Orange for j in J) <= BrisbaneFCOJSupply[q]
     )
     for q in Q
 }
@@ -189,14 +187,14 @@ def print_production():
 def print_trucks():
     cols = print_header("Trucks")
 
-    for f in DF:
+    for f in D:
         print(cols.format(Fruit[f], *[int(T[f, q].x) for q in Q]))
 
 def print_gourmet_choice():
     cols = print_header("Gourmet Choice")
 
     for j in J:
-        if Gourmet[j]:
+        if Juice[j] in GourmetJuice:
             print(cols.format(Juice[j], *[int(G[j, q].x) for q in Q]))
 
 
@@ -209,17 +207,16 @@ assert(round(m.objVal) == 26240836)
 
 #-----------------------------------------------------------------------------#
 
-# TODO: TYPE
 T = { (f, q): m.addVar(vtype=GRB.INTEGER) for f in F for q in Q }
 
 profit_function = quicksum(
     X[j, q] * SELL_PRICE_PER_KILOLITRE
     for j in J for q in Q
 ) - quicksum(
-    T[f, q] * TRUCK_LOAD_SIZE * Cost[f]
-    for f in DF for q in Q
+    T[f, q] * TRUCK_DELIVERY_SIZE * Cost[f]
+    for f in D for q in Q
 ) - quicksum(
-    X[j, q] * Blend[j].Orange * ORANGE_JUICE_COST
+    X[j, q] * Proportion[j].Orange * ORANGE_JUICE_COST
     for j in J for q in Q
 )
 
@@ -228,9 +225,9 @@ m.setParam("MIPGap", 0)
 
 DoNotExceedFruitTruckDelivery = {
     (f, q): m.addConstr(
-        quicksum(X[j, q] * Blend[j][f] for j in J) <= T[f, q] * TRUCK_LOAD_SIZE
+        quicksum(X[j, q] * Proportion[j][f] for j in J) <= T[f, q] * TRUCK_DELIVERY_SIZE
     )
-    for f in DF for q in Q
+    for f in D for q in Q
 }
 
 m.optimize()
@@ -246,16 +243,16 @@ G = { (j, q): m.addVar(vtype=GRB.BINARY) for j in J for q in Q  }
 LimitOfTwoGourmetProduced = {
     q: m.addConstr(
         # if the juice is gourmet, and it's being used, it consumes a spot
-        quicksum(Gourmet[j] and G[j, q] for j in J) == 2
+        quicksum(G[j, q] for j in J if Juice[j] in GourmetJuice) == 2
     )
     for q in Q
 }
 
-PreventThirdGourmetProduction = {
+BindDecisionVariable = {
     (j, q): m.addConstr(
-        G[j, q] * X[j, q] == X[j, q] # essentially `if G then X else 0` 
+        X[j, q] <= G[j, q] * Demand[j][q] # redundant
     )
-    for j in J for q in Q
+    for j in J for q in Q if Juice[j] in GourmetJuice
 }
 
 m.optimize()

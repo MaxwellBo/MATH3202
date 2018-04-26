@@ -21,19 +21,22 @@ nohead]{geometry}
 
 \begin{tabular}{rl}
     $J$ & Set of juices\\
+    $G$ & Set of gourmet juices, where $G \subsetneq J$\\
     $F$ & Set of types of fruit\\
+    $D$ & Set of types of deliverable fruit\footnote{Orange concentrate does not need to be delivered}, where $D \subsetneq F$\\
     $Q$ & Set of quarters\\
 \end{tabular}
 
 \section*{Data}
 
 \begin{tabular}{rl}
-    $b_{jf}$ & Fraction (?) $\in [0, 1]$ of fruit $f \in F$ in juice $j \in J$\\
+    $p_{jf}$ & Proportion $\in \mathbb{N}_{[0, 1]}$ of fruit $f \in F$ in juice $j \in J$\\
     $c_{f}$ & Cost (\$/kL) of local fruit $f \in F$\\
     $d_{jq}$ & Anticipated ability to sell kL of juice $j \in J$ in quarter $q \in Q$\\
     $b_{q}$ & Demand of kL of orange juice in Brisbane in quarter $q \in Q$\\
-    $g_{j}$ & Whether a juice $j \in J$ is gourmet\\ % TODO: qualify?
-    $s$ & Sell price (\$/kL) of any juice
+    $g_{j}$ & Whether a juice $j \in J$ is gourmet, $g_{j}$ is $1$ if $g_{j}$ is gourmet\\
+    $s$ & Sell price (\$/kL) of any juice $j \in J$\\
+    $l$ & Truck delivery size (kL) of any fruit $f \in F$
 \end{tabular}
 
 \section*{Variables}
@@ -41,34 +44,29 @@ nohead]{geometry}
 \begin{tabular}{rl}
     $x_{jq}$ & Number of kL of juice $j \in J$ produced in quarter $q \in Q$\\
     $t_{fq}$ & Number of trucks delivering a given fruit $f \in F$ in quarter $q \in Q$\\
-    $g_{jq}$ & Whether juice $j \in J$ and $g_j$, is produced in quarter $q \in Q$ % TODO: check
+    $g_{jq}$ & Whether juice $j \in G$ is produced in quarter $q \in Q$
 \end{tabular}
 
 \section*{Objectives}
 
 \[
-\text{max} \sum_{j \in J}\sum_{q \in Q} (x_{jq} s -\: x_{jq} \cdot (\sum_{f \in F} b_{jf} \cdot c_f))
+\text{max} \sum_{j \in J}\sum_{q \in Q} (x_{jq} s -\: x_{jq} \cdot \left(\sum_{f \in F} b_{jf} \cdot c_f\right))
 \]
 
-
-% \[
-% \text{max} \sum_{j \in J}\sum_{q \in Q} x_{jq} s -\: HMM
-% \]
 \section*{Constraints}
 
 \begin{align}
 x_{jq} & \geq 0 & \forall j \in J,\  \forall q \in Q \label{C1}\\
 t_{fq} & \geq 0 & \forall f \in F,\  \forall q \in Q \label{C2}\\
-g_{jq} & \in \SET{0, 1} & \forall j \in J,\ \forall q \in Q \label{C3}
-% s_{cq} & \geq 0 & \forall c \in C,\  \forall q \in Q \label{C2}\\
-% \sum_{c \in C} x_{cq} & \leq 10000 & \forall q \in Q \label{C3}\\
-% i_{c} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in \{ f \} \label{C4}\\
-% s_{c(q - 1)} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in Q \setminus \{ f \} \label{C5}\\
-% s_{cl} & \geq 3000 & \forall c \in C \label{C6}\\
-% s_{cq} & \leq m_c & \forall c \in C,\  \forall q \in Q \label{C7}
+g_{jq} & \in \SET{0, 1} & \forall j \in J,\ \forall q \in Q \label{C3}\\
+x_{jq} & \leq d_{jq} & \forall j \in J,\ \forall q \in Q \label{C4}\\
+\sum_{j \in J} x_{jq} p_{jo} & \leq b_q & \forall q \in Q \label{C5}\\
+\sum_{j \in J}  x_{jq} p_{jf} & \leq t_{fq} l & \forall f \in D,\ \forall q \in Q \label{C5}\\
+\sum_{j \in G}  g_{jq} f_{jf} & \eq 2 & \forall f \in D,\ \forall q \in Q \label{C6}
 \end{align}
 
-where $f$ is the first quarter, and $l$ is the last quarter, where $f, l \in Q$.
+where $o \in F$, where $o$ represents Orange.
+
 \begin{itemize}
     \item Constraints (\ref{C1}) and (\ref{C2}) are basic non-negativity constraints on $x$ and $t$. 
     \item Constraint (\ref{C3}) ensures $g$ is a binary variable.
