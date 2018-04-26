@@ -83,9 +83,9 @@ Juice = [ row[0] for row in tabulate(JUICE_TABLE) ]
 J = range(len(Juice))
 
 Fruit = [ row[0] for row in tabulate(COST_TABLE) ]
-DeliverableFruit = Fruit[:-1] # to drop Orange
+DeliverableFruit = Fruit[:-1] # We don't need to deliver oranges
 F = range(len(Fruit))
-DF = range(len(DeliverableFruit))
+DF = range(len(DeliverableFruit)) # TODO: UHHH?
 
 Quarter = [ "Q" + str(i) for i in range(1, 9) ]
 Q = range(len(Quarter))
@@ -100,9 +100,7 @@ def make_blend(cell):
     parts = cell.split(', ')
     # ['90% Orange', '10% Mango']
 
-    # care with global
     defaults = { k: 0 for k in Fruit }
-
     overrides = {}
 
     for i in parts:
@@ -111,7 +109,7 @@ def make_blend(cell):
 
         overrides[ingredient] = int(percentage[0:-1]) / 100 # -1 to strip %
 
-    return Parts(**{**defaults, **overrides}) # bigg splatt
+    return Parts(**{**defaults, **overrides}) # merge, then unpack
 
 Blend = [ make_blend(row[1]) for row in tabulate(JUICE_TABLE) ]
 
@@ -136,9 +134,9 @@ X = { (j, q): m.addVar() for j in J for q in Q }
 #############
 
 profit_function = quicksum(
-    (SELL_PRICE_PER_KILOLITRE * X[j, q])
+    (X[j, q] * SELL_PRICE_PER_KILOLITRE)
     -
-    (sum(Blend[j][f] * Cost[f] for f in F) * X[j, q])
+    (X[j, q]* sum(Blend[j][f] * Cost[f] for f in F))
     for j in J for q in Q
 )
 
@@ -211,12 +209,11 @@ assert(round(m.objVal) == 26240836)
 
 #-----------------------------------------------------------------------------#
 
-# make a variable representing the number of trucks delivering a certain fruit per quarter
 # TODO: TYPE
 T = { (f, q): m.addVar(vtype=GRB.INTEGER) for f in F for q in Q }
 
 profit_function = quicksum(
-    (X[j, q] * SELL_PRICE_PER_KILOLITRE)
+    X[j, q] * SELL_PRICE_PER_KILOLITRE
     for j in J for q in Q
 ) - quicksum(
     T[f, q] * TRUCK_LOAD_SIZE * Cost[f]

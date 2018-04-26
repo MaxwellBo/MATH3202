@@ -3,6 +3,8 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 
+\newcommand{\SET}[1]{\{ {#1} \}}
+
 \usepackage[
 top=0.3in, % was 0.7
 % bottom=1in, % was 0.55
@@ -30,7 +32,7 @@ nohead]{geometry}
     $c_{f}$ & Cost (\$/kL) of local fruit $f \in F$\\
     $d_{jq}$ & Anticipated ability to sell kL of juice $j \in J$ in quarter $q \in Q$\\
     $b_{q}$ & Demand of kL of orange juice in Brisbane in quarter $q \in Q$\\
-    $g_{j}$ & Whether a juice $j \in J$ is gourmet\\
+    $g_{j}$ & Whether a juice $j \in J$ is gourmet\\ % TODO: qualify?
     $s$ & Sell price (\$/kL) of any juice
 \end{tabular}
 
@@ -38,33 +40,37 @@ nohead]{geometry}
 
 \begin{tabular}{rl}
     $x_{jq}$ & Number of kL of juice $j \in J$ produced in quarter $q \in Q$\\
-    $t_{fq}$ & ???
+    $t_{fq}$ & Number of trucks delivering a given fruit $f \in F$ in quarter $q \in Q$\\
+    $g_{jq}$ & Whether juice $j \in J$ and $g_j$, is produced in quarter $q \in Q$ % TODO: check
 \end{tabular}
 
 \section*{Objectives}
 
 \[
-\text{max} \sum_{j \in J}\sum_{q \in Q} (s \cdot x_{jq} -\: (\sum_{f \in F} b_{jf} \cdot c_f) \cdot x_{jq})
+\text{max} \sum_{j \in J}\sum_{q \in Q} (x_{jq} s -\: x_{jq} \cdot (\sum_{f \in F} b_{jf} \cdot c_f))
 \]
 
+
+% \[
+% \text{max} \sum_{j \in J}\sum_{q \in Q} x_{jq} s -\: HMM
+% \]
 \section*{Constraints}
 
 \begin{align}
 x_{jq} & \geq 0 & \forall j \in J,\  \forall q \in Q \label{C1}\\
-s_{cq} & \geq 0 & \forall c \in C,\  \forall q \in Q \label{C2}\\
-\sum_{c \in C} x_{cq} & \leq 10000 & \forall q \in Q \label{C3}\\
-i_{c} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in \{ f \} \label{C4}\\
-s_{c(q - 1)} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in Q \setminus \{ f \} \label{C5}\\
-s_{cl} & \geq 3000 & \forall c \in C \label{C6}\\
-s_{cq} & \leq m_c & \forall c \in C,\  \forall q \in Q \label{C7}
+t_{fq} & \geq 0 & \forall f \in F,\  \forall q \in Q \label{C2}\\
+g_{jq} & \in \SET{0, 1} & \forall j \in J,\ \forall q \in Q \label{C3}
+% s_{cq} & \geq 0 & \forall c \in C,\  \forall q \in Q \label{C2}\\
+% \sum_{c \in C} x_{cq} & \leq 10000 & \forall q \in Q \label{C3}\\
+% i_{c} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in \{ f \} \label{C4}\\
+% s_{c(q - 1)} +  x_{cq} - d_{cq} & = s_{cq} & \forall c \in C,\  \forall q \in Q \setminus \{ f \} \label{C5}\\
+% s_{cl} & \geq 3000 & \forall c \in C \label{C6}\\
+% s_{cq} & \leq m_c & \forall c \in C,\  \forall q \in Q \label{C7}
 \end{align}
 
 where $f$ is the first quarter, and $l$ is the last quarter, where $f, l \in Q$.
 \begin{itemize}
-    \item Constraints (\ref{C1}) and (\ref{C2}) are basic non-negativity constraints on our variables. 
-    \item Constraints (\ref{C3}) ensures that the amount shipped per quarter does not exceed the ships capacity.
-    \item Constraints (\ref{C4}) and (\ref{C5}) describe a recursive relationship between initial supplies, new deliveries, demand, and the amount stored at the end of each quarter.
-    \item Constarint (\ref{C6}) ensures that there at least 3000 barrels in storage in each port by the end of the last quarter.
-    \item Constarint (\ref{C7}) ensures that we do not exceed the capacities of our facilities in each port.
+    \item Constraints (\ref{C1}) and (\ref{C2}) are basic non-negativity constraints on $x$ and $t$. 
+    \item Constraint (\ref{C3}) ensures $g$ is a binary variable.
 \end{itemize}
 \end{document}
