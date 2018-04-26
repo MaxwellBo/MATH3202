@@ -368,7 +368,10 @@ NoTwoLocationLoops = {
 
 def print_path():
     for f in L:
-        print(' '.join("{}->{}".format(f, t) if int(T[f, t].x) else '     ' for t in L))
+        print(
+            ' '.join("{}->{}".format(Location[f], Location[t]) 
+            if int(T[f, t].x) else '     ' for t in L)
+        )
 
 n.optimize()
 print_cost("Communication 8", n)
