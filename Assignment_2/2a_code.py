@@ -151,7 +151,7 @@ DoNotExceedDemand = {
     for j in J for q in Q
 }
 
-DoNotExceedBrisbaneFCOJSupply = {
+DoNotExceedBrisbaneFCOJSupply = { 
     q: m.addConstr(
         quicksum(X[j, q] * Proportion[j].Orange for j in J) <= BrisbaneFCOJSupply[q]
     )
@@ -197,12 +197,42 @@ def print_gourmet_choice():
         if Juice[j] in GourmetJuice:
             print(cols.format(Juice[j], *[int(G[j, q].x) for q in Q]))
 
+def analyse_demand_slack():
+    cols = print_header("Demand sensitivity analysis (Slack)")
+
+    for j in J:
+        print(cols.format(Juice[j], *[int(DoNotExceedDemand[j, q].slack) for q in Q]))
+
+def analyse_demand_pi():
+    cols = print_header("Demand sensitivity analysis (Pi)")
+
+    for j in J:
+        print(cols.format(Juice[j], *[int(DoNotExceedDemand[j, q].pi) for q in Q]))
+
+def analyse_brisbane_supply_slack():
+    cols = print_header("Brisbane supply sensitivity analysis (Slack)")
+
+    print(cols.format("Slack", *[int(DoNotExceedBrisbaneFCOJSupply[q].slack) for q in Q]))
+
+def analyse_brisbane_supply_pi():
+    cols = print_header("Brisbane supply sensitivity analysis (Pi)")
+
+    print(cols.format("Pi", *[int(DoNotExceedBrisbaneFCOJSupply[q].pi) for q in Q]))
+
+def analyse_truck_slack():
+    cols = print_header("Truck capacity ({}) (Slack)".format(TRUCK_DELIVERY_SIZE))
+
+    for f in D:
+        print(cols.format(Fruit[f], *["{0:.2f}".format(abs(DoNotExceedFruitTruckDelivery[f, q].slack)) for q in Q]))
+
 
 #------------------------------------------------------------------------------#
 
 m.optimize()
 print_cost("Communication 4", m)
 print_production()
+analyse_demand_pi()
+analyse_brisbane_supply_pi()
 assert(round(m.objVal) == 26240836)
 
 #-----------------------------------------------------------------------------#
@@ -276,8 +306,13 @@ print_cost("Communication 7", m)
 print_production()
 print_trucks()
 print_gourmet_choice()
+analyse_demand_slack()
+analyse_truck_slack()
+analyse_brisbane_supply_slack()
+
 assert(round(m.objVal) == 23206548)
 
+#-----------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------#
 
 n = Model("Pure Fresh")
