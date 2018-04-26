@@ -16,6 +16,22 @@ Orange and Mango Juice    311    347    469    389    329    363    484    568
         Orchard Medley   1151    621    697    909   1133    615    542    865
    Strawberry Surprise    625    740    468    409    665    750    411    464
 
+Demand sensitivity analysis (Pi)
+
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+          Orange Juice      0    526    526    526    526    526    526    526
+Orange and Mango Juice     19    493    493    493    493    493    493    493
+       Breakfast Juice    684    762    762    762    762    762    762    762
+        Tropical Juice    782    803    803    803    803    803    803    803
+         Guava Delight    853    853    853    853    853    853    853    853
+        Orchard Medley    450    686    686    686    686    686    686    686
+   Strawberry Surprise    818    818    818    818    818    818    818    818
+
+Brisbane supply sensitivity analysis (Pi)
+
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                    Pi    526      0      0      0      0      0      0      0
+
 
 Communication 5
 
@@ -45,7 +61,7 @@ Trucks
 
 Communication 6
 
-Optimal cost: $23,426,440.25449524
+Optimal cost: $23,426,440.254495233
 
 Production
 
@@ -55,18 +71,18 @@ Orange and Mango Juice    291    347    469    389    316    363    484    568
        Breakfast Juice    682    707    838    938    586    787   1141    986
         Tropical Juice    492    586    721    739    450    549    645    779
          Guava Delight      0      0    589    393      0      0    559      0
-        Orchard Medley   1145    621    697    909   1133    615    542    865
+        Orchard Medley   1145    621    697    909   1133    615    541    865
    Strawberry Surprise    625    740      0      0    665    746      0    464
 
 Trucks
 
                            Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
-                 Apple    183    175    175    177    178    176    177    190
+                 Apple    183    175    175    177    178    177    177    190
                  Mango     10      8     10     11     10      9     10     12
-             Pineapple     34     38     50     53     30     38     57     51
+             Pineapple     34     38     51     53     30     39     57     51
           Passionfruit      1      1      1      1      1      1      1      1
                  Guava      2      2      6      4      2      2      6      1
-            Strawberry      5      6      0      0      5      6      0      4
+            Strawberry      5      6      0      0      6      6      0      4
 
 Gourmet Choice
 
@@ -84,7 +100,7 @@ Production
 
                            Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
           Orange Juice    900    872   1206    981    781   1055   1420   1236
-Orange and Mango Juice    291    347    469    389    316    342    484    568
+Orange and Mango Juice    290    347    469    389    316    342    484    568
        Breakfast Juice    682    707    829    938    586    788   1141    986
         Tropical Juice    492    586    726    739    450    549    645    779
          Guava Delight      0    452      0    393      0    424    559      0
@@ -96,7 +112,7 @@ Trucks
                            Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
                  Apple    183    180    170    177    178    181    177    190
                  Mango     10      5     10     11     10      5     10     12
-             Pineapple     34     42     44     53     30     43     57     51
+             Pineapple     34     42     45     53     30     43     57     51
           Passionfruit      1      1      1      1      1      1      1      1
                  Guava      2      6      1      4      2      6      6      1
             Strawberry      5      6      4      0      6      6      0      4
@@ -107,6 +123,32 @@ Gourmet Choice
          Guava Delight      0      1      0      1      0      1      1      0
         Orchard Medley      1      0      1      1      1      0      1      1
    Strawberry Surprise      1      1      1      0      1      1      0      1
+
+Demand sensitivity analysis (Slack)
+
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+          Orange Juice     72      0      0      0      0      0      0      0
+Orange and Mango Juice     20      0      0      0     12     20      0      0
+       Breakfast Juice      0      0      8      0      0      0      0      1
+        Tropical Juice      0      0      0      0      0      0      0      0
+         Guava Delight    340      6    593      0    276      0      0    389
+        Orchard Medley      5    621      0      0      0    615      0      0
+   Strawberry Surprise      0      0      0    409      0      0    411      0
+
+Truck capacity (10) (Slack)
+
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                 Apple   0.00   2.65   2.29   4.85   0.20   5.55   5.00   0.82
+                 Mango   0.00   1.16   1.66   6.89   0.00   0.00   1.68   0.21
+             Pineapple   1.44   1.04   0.00   6.36   0.92   2.26   1.12   0.00
+          Passionfruit   5.08   4.14   2.74   2.61   5.50   4.51   3.55   2.21
+                 Guava   7.50   0.00   0.64   0.70   6.70   2.60   4.10   0.72
+            Strawberry   0.00   0.80   2.56   0.00   6.80   0.00   0.00   2.88
+
+Brisbane supply sensitivity analysis (Slack)
+
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+                 Slack      0    786    404    489     68    446    303    384
 
 
 Communication 8
