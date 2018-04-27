@@ -160,6 +160,13 @@ DoNotExceedBrisbaneFCOJSupply = {
 
 #------------------------------------------------------------------------------#
 
+def print_profit(communication, model):
+    print()
+    print()
+    print(communication)
+    print()
+    print("Optimal profit: ${:,}".format(model.objVal))
+
 def print_cost(communication, model):
     print()
     print()
@@ -245,7 +252,7 @@ def analyse_truck_slack():
 #------------------------------------------------------------------------------#
 
 m.optimize()
-print_cost("Communication 4", m)
+print_profit("Communication 4", m)
 print_production()
 analyse_production()
 analyse_demand_pi()
@@ -280,7 +287,7 @@ DoNotExceedFruitTruckDelivery = {
 }
 
 m.optimize()
-print_cost("Communication 5", m)
+print_profit("Communication 5", m)
 print_production()
 print_trucks()
 assert(round(m.objVal) == 26065453)
@@ -305,7 +312,7 @@ BindDecisionVariable = {
 }
 
 m.optimize()
-print_cost("Communication 6", m)
+print_profit("Communication 6", m)
 print_production()
 print_trucks()
 print_gourmet_choice()
@@ -321,7 +328,7 @@ ProduceOneGourmetPerTwoQuarters = {
 }
 
 m.optimize()
-print_cost("Communication 7", m)
+print_profit("Communication 7", m)
 print_production()
 print_trucks()
 print_gourmet_choice()
@@ -422,6 +429,7 @@ def print_path():
         )
 
 n.optimize()
+
 print_cost("Communication 8", n)
 print_path()
 assert(n.objVal == 725)
