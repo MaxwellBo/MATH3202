@@ -184,6 +184,12 @@ def print_production():
     for j in J:
         print(cols.format(Juice[j], *[int(X[j, q].x) for q in Q]))
 
+def analyse_production():
+    cols = print_header("Production sensitivity analysis (SAObjLow)")
+
+    for j in J:
+        print(cols.format(Juice[j], *[int(X[j, q].SAOBJLow) for q in Q]))
+ 
 def print_trucks():
     cols = print_header("Trucks")
 
@@ -241,6 +247,7 @@ def analyse_truck_slack():
 m.optimize()
 print_cost("Communication 4", m)
 print_production()
+analyse_production()
 analyse_demand_pi()
 analyse_demand_sarhslow()
 analyse_brisbane_supply_pi()

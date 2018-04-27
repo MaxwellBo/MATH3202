@@ -16,6 +16,17 @@ Orange and Mango Juice    311    347    469    389    329    363    484    568
         Orchard Medley   1151    621    697    909   1133    615    542    865
    Strawberry Surprise    625    740    468    409    665    750    411    464
 
+Production sensitivity analysis (SAObjLow)
+
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+          Orange Juice      0      0      0      0      0      0      0      0
+Orange and Mango Juice    473      0      0      0      0      0      0      0
+       Breakfast Juice     78      0      0      0      0      0      0      0
+        Tropical Juice     21      0      0      0      0      0      0      0
+         Guava Delight      0      0      0      0      0      0      0      0
+        Orchard Medley    236      0      0      0      0      0      0      0
+   Strawberry Surprise      0      0      0      0      0      0      0      0
+
 Demand sensitivity analysis (Pi)
 
                            Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
