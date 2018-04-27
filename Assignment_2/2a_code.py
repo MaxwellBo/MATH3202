@@ -6,7 +6,6 @@ from gurobipy import *
 from collections import namedtuple
 
 m = Model("Pure Fresh")
-m.setParam('OutputFlag', 0) # TODO REMOVE
 
 #########
 # UTILS #
@@ -354,7 +353,6 @@ assert(round(m.objVal) == 23206548)
 #-----------------------------------------------------------------------------#
 
 n = Model("Pure Fresh")
-n.setParam('OutputFlag', 0) # TODO REMOVE
 
 #############
 # CONSTANTS #
