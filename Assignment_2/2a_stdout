@@ -27,10 +27,26 @@ Orange and Mango Juice     19    493    493    493    493    493    493    493
         Orchard Medley    450    686    686    686    686    686    686    686
    Strawberry Surprise    818    818    818    818    818    818    818    818
 
+Demand supply sensitivity analysis (SARHSLow)
+
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+              SARHSLow    880      0      0      0      0      0      0      0
+              SARHSLow    207      0      0      0      0      0      0      0
+              SARHSLow     63      0      0      0      0      0      0      0
+              SARHSLow      0      0      0      0      0      0      0      0
+              SARHSLow      0      0      0      0      0      0      0      0
+              SARHSLow    944      0      0      0      0      0      0      0
+              SARHSLow      0      0      0      0      0      0      0      0
+
 Brisbane supply sensitivity analysis (Pi)
 
                            Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
                     Pi    526      0      0      0      0      0      0      0
+
+Brisbane supply sensitivity analysis (SARHSLow)
+
+                           Q1     Q2     Q3     Q4     Q5     Q6     Q7     Q8
+              SARHSLow    919   1593   2096   1910   1692   1798   2296   2315
 
 
 Communication 5

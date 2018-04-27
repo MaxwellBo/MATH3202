@@ -209,6 +209,12 @@ def analyse_demand_pi():
     for j in J:
         print(cols.format(Juice[j], *[int(DoNotExceedDemand[j, q].pi) for q in Q]))
 
+def analyse_demand_sarhslow():
+    cols = print_header("Demand supply sensitivity analysis (SARHSLow)")
+
+    for j in J:
+        print(cols.format("SARHSLow", *[int(DoNotExceedDemand[j, q].SARHSLow) for q in Q]))
+
 def analyse_brisbane_supply_slack():
     cols = print_header("Brisbane supply sensitivity analysis (Slack)")
 
@@ -219,12 +225,16 @@ def analyse_brisbane_supply_pi():
 
     print(cols.format("Pi", *[int(DoNotExceedBrisbaneFCOJSupply[q].pi) for q in Q]))
 
+def analyse_brisbane_supply_sarhslow():
+    cols = print_header("Brisbane supply sensitivity analysis (SARHSLow)")
+
+    print(cols.format("SARHSLow", *[int(DoNotExceedBrisbaneFCOJSupply[q].SARHSLow) for q in Q]))
+
 def analyse_truck_slack():
     cols = print_header("Truck capacity ({}) (Slack)".format(TRUCK_DELIVERY_SIZE))
 
     for f in D:
         print(cols.format(Fruit[f], *["{0:.2f}".format(abs(DoNotExceedFruitTruckDelivery[f, q].slack)) for q in Q]))
-
 
 #------------------------------------------------------------------------------#
 
@@ -232,7 +242,9 @@ m.optimize()
 print_cost("Communication 4", m)
 print_production()
 analyse_demand_pi()
+analyse_demand_sarhslow()
 analyse_brisbane_supply_pi()
+analyse_brisbane_supply_sarhslow()
 assert(round(m.objVal) == 26240836)
 
 #-----------------------------------------------------------------------------#
