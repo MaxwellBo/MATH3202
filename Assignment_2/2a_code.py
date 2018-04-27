@@ -22,12 +22,12 @@ def tabulate(xy):
 # "the average cost of reconstituted orange juice is $974 per thousand litres (kL)."
 ORANGE_JUICE_COST = 974
 
-# s Sell price ($/kL) of any juice j ∈ J
+# s Sell price ($/kL) of any juice j in J
 # "We sell all juice produced for $1.50 per litre"
 SELL_PRICE_PER_LITRE = 1.50
 SELL_PRICE_PER_KILOLITRE = 1.50 * 1000
 
-# l Truck delivery size (kL) of any fruit f ∈ F
+# l Truck delivery size (kL) of any fruit f in F
 # "delivery trucks must always bring full loads of a single local fruit, 
 # equivalent to 10 kL of processed juice per truck"
 TRUCK_DELIVERY_SIZE = 10
@@ -121,20 +121,20 @@ def make_blend(cell):
 # p_jf Proportion in N[0,1] of fruit f in F in juice j in J
 Proportion = [ make_blend(row[1]) for row in tabulate(JUICE_TABLE) ]
 
-# c_f Cost ($/kL) of local fruit f ∈ F
+# c_f Cost ($/kL) of local fruit f in F
 Cost = [ int(row[1]) for row in tabulate(COST_TABLE) ]
 
-# d_jq Anticipated ability to sell kL of juice j ∈ J in quarter q ∈ Q
+# d_jq Anticipated ability to sell kL of juice j in J in quarter q in Q
 Demand = [ [ int(i) for i in row ] for row in tabulate(DEMAND_TABLE) ]
 
-# b_q Demand of kL of orange juice in Brisbane in quarter q ∈ Q
+# b_q Demand of kL of orange juice in Brisbane in quarter q in Q
 BrisbaneOJDemand = [ int(row[1]) for row in tabulate(BRISBANE_FCOJ_SUPPLY_TABLE) ]
 
 #############
 # VARIABLES #
 #############
 
-# Number of kL of juice j ∈ J produced in quarter q ∈ Q
+# Number of kL of juice j in J produced in quarter q in Q
 X = { (j, q): m.addVar() for j in J for q in Q }
 
 #############
@@ -273,7 +273,7 @@ assert(round(m.objVal) == 26240836)
 
 #-----------------------------------------------------------------------------#
 
-# Number of trucks delivering a given fruit f ∈ F in quarter q ∈ Q
+# Number of trucks delivering a given fruit f in F in quarter q in Q
 T = { (f, q): m.addVar(vtype=GRB.INTEGER) for f in F for q in Q }
 
 profit_function = quicksum(
@@ -386,14 +386,14 @@ L = range(len(Location))
 
 def parse_cell(x): return sys.maxsize if x == '—' else int(x)
 
-# c_ft Cost ($) of traveling from location f ∈ L to location t ∈ L
+# c_ft Cost ($) of traveling from location f in L to location t in L
 Cost = [ [ parse_cell(col) for col in row[1:] ] for row in tabulate(TRAVEL_COST_TABLE)[1:] ]
 
 #############
 # VARIABLES #
 #############
 
-# t_ft Decision to travel from location f ∈ L to location t ∈ L
+# t_ft Decision to travel from location f in L to location t in L
 T = { (f, t): n.addVar(vtype=GRB.BINARY) for f in L for t in L }
 
 #############
