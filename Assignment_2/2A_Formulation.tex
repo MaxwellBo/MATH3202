@@ -30,9 +30,9 @@
     $d_{jq}$ & Anticipated ability to sell kL of juice $j \in J$ in quarter $q \in Q$\\
     $b_{q}$ & Demand of kL of orange juice in Brisbane in quarter $q \in Q$\\
     $g_{j}$ & Whether a juice $j \in J$ is gourmet, $g_{j}$ is $1$ if $g_{j}$ is gourmet\\
+    $r$ & Cost (\$/kL) of reconstituted orange juice\\
     $s$ & Sell price (\$/kL) of any juice $j \in J$\\
-    $l$ & Truck delivery size (kL) of any fruit $f \in F$\\
-    $r$ & Cost (\$/kL) of reconstituted orange juice
+    $l$ & Truck delivery size (kL) of any fruit $f \in F$
 \end{tabular}
 
 \section*{Variables}
@@ -46,7 +46,7 @@
 \section*{Objectives}
 
 \[
-\text{max} \sum_{j \in J}\sum_{q \in Q} \left(x_{jq} \cdot s -\: x_{jq} \cdot \left(\sum_{f \in F} b_{jf} \cdot c_f\right)\right)
+\text{max} \sum_{j \in J}\sum_{q \in Q} \left(x_{jq} \cdot s -\: x_{jq} \cdot \left(\sum_{f \in F} p_{jf} \cdot c_f\right)\right)
 \]
 
 \[
@@ -55,7 +55,7 @@
 -\: 
 \left( \sum_{f \in D}\sum_{q \in Q} t_{fq} \cdot l \cdot c_{f} \right) 
 -\: 
-\left( \sum_{j \in J}\sum_{q \in Q} x_{fq} \cdot p_{jo} \cdot r \right) 
+\left( \sum_{j \in J}\sum_{q \in Q} x_{jq} \cdot p_{jo} \cdot r \right) 
 \]
 
 where $o \in F$, where $o$ represents Orange
@@ -123,7 +123,7 @@ t_{ft} +  t_{tf} & \leq 1 & \forall f \in L,\ \forall t \in L \label{C12}
 
 \begin{itemize}
     \item Constraint (\ref{C10}) ensures that each location is departed from only once
-    \item Constraint (\ref{C11}) ensures that each location is arrivated at only once
+    \item Constraint (\ref{C11}) ensures that each location is arrived at only once
     \item Constraint (\ref{C12}) ensures that there are no two location loops
 \end{itemize}
 

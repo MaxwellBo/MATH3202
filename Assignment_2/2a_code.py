@@ -19,16 +19,22 @@ def tabulate(xy):
 # CONSTANTS #
 #############
 
+# r Cost ($/kL) of reconstituted orange juice
 # "the average cost of reconstituted orange juice is $974 per thousand litres (kL)."
 ORANGE_JUICE_COST = 974
 
+# s Sell price ($/kL) of any juice j ∈ J
 # "We sell all juice produced for $1.50 per litre"
 SELL_PRICE_PER_LITRE = 1.50
 SELL_PRICE_PER_KILOLITRE = 1.50 * 1000
 
+# l Truck delivery size (kL) of any fruit f ∈ F
 # "delivery trucks must always bring full loads of a single local fruit, 
 # equivalent to 10 kL of processed juice per truck"
 TRUCK_DELIVERY_SIZE = 10
+
+# NB: Parsing all data from tables reduced the number of transcription errors
+#     significantly. I have opted to continue to do so.
 
 # Quarter   Brisbane
 BRISBANE_FCOJ_SUPPLY_TABLE = """
@@ -81,6 +87,7 @@ Juice = [ row[0] for row in tabulate(JUICE_TABLE) ]
 J = range(len(Juice))
 
 GourmetJuice = [ "Guava Delight", "Orchard Medley",  "Strawberry Surprise" ] 
+# We don't define a G here because we need to use J's indexes
 
 Fruit = [ row[0] for row in tabulate(COST_TABLE) ]
 F = range(len(Fruit))
@@ -112,19 +119,23 @@ def make_blend(cell):
 
     return Parts(**{**defaults, **overrides}) # merge, then unpack
 
+# p_jf Proportion in N[0,1] of fruit f in F in juice j in J
 Proportion = [ make_blend(row[1]) for row in tabulate(JUICE_TABLE) ]
 
+# c_f Cost ($/kL) of local fruit f ∈ F
 Cost = [ int(row[1]) for row in tabulate(COST_TABLE) ]
 
+# d_jq Anticipated ability to sell kL of juice j ∈ J in quarter q ∈ Q
 Demand = [ [ int(i) for i in row ] for row in tabulate(DEMAND_TABLE) ]
 
-BrisbaneFCOJSupply = [ int(row[1]) for row in tabulate(BRISBANE_FCOJ_SUPPLY_TABLE) ]
+# b_q Demand of kL of orange juice in Brisbane in quarter q ∈ Q
+BrisbaneOJDemand = [ int(row[1]) for row in tabulate(BRISBANE_FCOJ_SUPPLY_TABLE) ]
 
 #############
 # VARIABLES #
 #############
 
-# make a variable representing the number of kL of a certain juice produced per quarter
+# Number of kL of juice j ∈ J produced in quarter q ∈ Q
 X = { (j, q): m.addVar() for j in J for q in Q }
 
 #############
@@ -151,9 +162,9 @@ DoNotExceedDemand = {
     for j in J for q in Q
 }
 
-DoNotExceedBrisbaneFCOJSupply = { 
+DoNotExceedBrisbaneOJDemand = { 
     q: m.addConstr(
-        quicksum(X[j, q] * Proportion[j].Orange for j in J) <= BrisbaneFCOJSupply[q]
+        quicksum(X[j, q] * Proportion[j].Orange for j in J) <= BrisbaneOJDemand[q]
     )
     for q in Q
 }
@@ -231,23 +242,23 @@ def analyse_demand_sarhslow():
 def analyse_brisbane_supply_slack():
     cols = print_header("Brisbane supply sensitivity analysis (Slack)")
 
-    print(cols.format("Slack", *[int(DoNotExceedBrisbaneFCOJSupply[q].slack) for q in Q]))
+    print(cols.format("Slack", *[int(DoNotExceedBrisbaneOJDemand[q].slack) for q in Q]))
 
 def analyse_brisbane_supply_pi():
     cols = print_header("Brisbane supply sensitivity analysis (Pi)")
 
-    print(cols.format("Pi", *[int(DoNotExceedBrisbaneFCOJSupply[q].pi) for q in Q]))
+    print(cols.format("Pi", *[int(DoNotExceedBrisbaneOJDemand[q].pi) for q in Q]))
 
 def analyse_brisbane_supply_sarhslow():
     cols = print_header("Brisbane supply sensitivity analysis (SARHSLow)")
 
-    print(cols.format("SARHSLow", *[int(DoNotExceedBrisbaneFCOJSupply[q].SARHSLow) for q in Q]))
+    print(cols.format("SARHSLow", *[int(DoNotExceedBrisbaneOJDemand[q].SARHSLow) for q in Q]))
 
 def analyse_truck_slack():
     cols = print_header("Truck capacity ({}) (Slack)".format(TRUCK_DELIVERY_SIZE))
 
     for f in D:
-        print(cols.format(Fruit[f], *["{0:.2f}".format(abs(DoNotExceedFruitTruckDelivery[f, q].slack)) for q in Q]))
+        print(cols.format(Fruit[f], *["{0:.2f}".format(abs(DoNotExceedFruitTruckSupply[f, q].slack)) for q in Q]))
 
 #------------------------------------------------------------------------------#
 
@@ -263,6 +274,7 @@ assert(round(m.objVal) == 26240836)
 
 #-----------------------------------------------------------------------------#
 
+# Number of trucks delivering a given fruit f ∈ F in quarter q ∈ Q
 T = { (f, q): m.addVar(vtype=GRB.INTEGER) for f in F for q in Q }
 
 profit_function = quicksum(
@@ -279,7 +291,7 @@ profit_function = quicksum(
 m.setObjective(profit_function, GRB.MAXIMIZE)
 m.setParam("MIPGap", 0)
 
-DoNotExceedFruitTruckDelivery = {
+DoNotExceedFruitTruckSupply = {
     (f, q): m.addConstr(
         quicksum(X[j, q] * Proportion[j][f] for j in J) <= T[f, q] * TRUCK_DELIVERY_SIZE
     )
@@ -296,7 +308,7 @@ assert(round(m.objVal) == 26065453)
 
 G = { (j, q): m.addVar(vtype=GRB.BINARY) for j in J for q in Q  }
 
-LimitOfTwoGourmetProduced = {
+OnlyTwoGourmetProduced = {
     q: m.addConstr(
         # if the juice is gourmet, and it's being used, it consumes a spot
         quicksum(G[j, q] for j in J if Juice[j] in GourmetJuice) == 2
@@ -376,13 +388,14 @@ L = range(len(Location))
 
 def parse_cell(x): return sys.maxsize if x == '—' else int(x)
 
+# c_ft Cost ($) of traveling from location f ∈ L to location t ∈ L
 Cost = [ [ parse_cell(col) for col in row[1:] ] for row in tabulate(TRAVEL_COST_TABLE)[1:] ]
 
 #############
 # VARIABLES #
 #############
 
-# from, to
+# t_ft Decision to travel from location f ∈ L to location t ∈ L
 T = { (f, t): n.addVar(vtype=GRB.BINARY) for f in L for t in L }
 
 #############
@@ -429,7 +442,6 @@ def print_path():
         )
 
 n.optimize()
-
 print_cost("Communication 8", n)
 print_path()
 assert(n.objVal == 725)
