@@ -1,0 +1,12 @@
+Communication 9
+We’d like to help some of our smaller customers manage their stock and orders with us. For example, Jenny’s Juices is a corner store which has a small fridge set aside for displaying our famous Orchard Medley product. The fridge can hold 10 bottles and for the next week they expect the follow daily demands (the maximum number of bottles that can be sold on that day):
+
+Day	1	2	3	4	5	6	7
+Demand	6	11	11	5	6	5	10
+Each evening they can put an order in with us for a delivery of up to 15 bottles the next morning. These deliveries cost $10.00 plus $1.50 per bottle, with a maximum of 15 bottles in a delivery. They then sell the bottles for the retail price of $5.00 each.
+
+If they end up with any bottles left at the end of a day that do not fit into their fridge then they have to discard them.
+
+Assuming the fridge is empty on the evening before Day 1, and anything left after Day 7 will be wasted, how should they plan their orders for the next week?
+
+Please provide us with the maximum profit Jenny’s Juices can obtain:
