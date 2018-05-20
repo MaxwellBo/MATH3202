@@ -50,6 +50,8 @@ def V(t, s):
             for a in range(len(Demand)))
                 
 #Need to figure out how to fix t = 0, i.e. action should still be taken 
+# Need to make it so that it is not dependent on demand 
+
 ##CONSTRAINTS 
 #a <= 15 
 #s <= 10 
