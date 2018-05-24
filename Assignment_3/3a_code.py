@@ -2,11 +2,8 @@ __author__  = "Maxwell Bo, Chantel Morris"
 
 """Assignment 3 - Dynamic Programming - Section A"""
 
-from functools import lru_cache
 from typing import List
-import itertools
 from collections import namedtuple
-import inspect
 
 #########
 # UTILS #
@@ -97,7 +94,7 @@ def apply_discount(s: Discount):
 def estimate_chance_of_higher_demand(s: Discount):
     return CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if s else CHANCE_OF_HIGHER_DEMAND
 
-def will_sell(s: State, a: Action, demand):
+def will_sell(s: State, a: Action, demand: Demand):
     (bottles, day) = s
     (ordered, discount) = a
 
@@ -150,7 +147,7 @@ def V(s: State, c: Communication):
         cache[(s, c)] = max(
             (
                 (1 - estimate_chance_of_higher_demand(a.discount)) * C(s, a, RegularDemand, c) +\
-                    estimate_chance_of_higher_demand(a.discount)  * C(s, a, HighDemand, c)
+                     estimate_chance_of_higher_demand(a.discount)  * C(s, a, HighDemand, c)
                 ,
                 a
             )
