@@ -47,12 +47,17 @@ Day	1	2	3	4	5	6	7
 Demand	7	8	11	11	4	5	11
 """
 
+# h Chance of having higher demand than usual
+CHANCE_OF_HIGHER_DEMAND = 0.4
+
 ########
 # DATA #
 ########
 
 # d_t Demand of bottles for each day t in T
+global Demand # forgive me
 Demand = [ int(i) for i in tabulate(DEMAND_TABLE)[1][1:] ]
+
 assert(len(Demand) == 7)
 
 #########
@@ -65,9 +70,11 @@ Day = int       # the day we're ordering the bottles on
 
 def BottlesStored(s: State, a: Action, t: Day):
     return clamp(0, s + a - BottlesSold(s, a, t), FRIDGE_CAPACITY)
-
+ 
 def BottlesSold(s: State, a: Action, t: Day): 
     # we either sell what is demanded, or sell our entire supply
+    global Demand
+    print(Demand)
     return min(Demand[t], s + a)
 
 def CostOfDelivery(a: Action):
@@ -94,4 +101,26 @@ def Profit(s: State, t: Day):
         for a in range(MAXIMUM_DELIVERY_SIZE + 1)
     )
 
-print(Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY))
+p = Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY)
+print(f"Communication 9 - Profit is {p}")
+
+################################################################################
+################################################################################
+
+HIGH_DEMAND_TABLE = """
+Day	1	2	3	4	5	6	7
+Regular Demand	7	8	11	11	4	5	11
+High Demand	13	12	15	13	9	9	18
+"""
+
+HighDemand = [ int(i) for i in tabulate(HIGH_DEMAND_TABLE)[2][1:] ]
+
+assert(len(Demand) == 7)
+
+Demand = [ 
+    d * (1 - CHANCE_OF_HIGHER_DEMAND) + h * CHANCE_OF_HIGHER_DEMAND 
+    for (d, h) in zip(Demand, HighDemand)
+]
+
+p = Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY)
+print(f"Communication 10 - Profit is {p}")
