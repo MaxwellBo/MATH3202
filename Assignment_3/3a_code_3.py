@@ -3,6 +3,7 @@ __author__  = "Maxwell Bo, Chantel Morris"
 """Assignment 3 - Dynamic Programming - Section A"""
 
 from functools import lru_cache
+from typing import List
 
 #########
 # UTILS #
@@ -44,7 +45,8 @@ MAXIMUM_DELIVERY_SIZE = 15
 
 DEMAND_TABLE = """
 Day	1	2	3	4	5	6	7
-Demand	7	8	11	11	4	5	11
+Regular Demand	7	8	11	11	4	5	11
+High Demand	13	12	15	13	9	9	18
 """
 
 # h Chance of having higher demand than usual
@@ -54,11 +56,11 @@ CHANCE_OF_HIGHER_DEMAND = 0.4
 # DATA #
 ########
 
+Demand = List[int]
 # d_t Demand of bottles for each day t in T
-global Demand # forgive me
-Demand = [ int(i) for i in tabulate(DEMAND_TABLE)[1][1:] ]
-
-assert(len(Demand) == 7)
+# global Demand # forgive me
+RegularDemand: Demand = [ int(i) for i in tabulate(DEMAND_TABLE)[1][1:] ]
+HighDemand: Demand = [ int(i) for i in tabulate(DEMAND_TABLE)[2][1:] ]
 
 #########
 # FUNCS #
@@ -67,15 +69,14 @@ assert(len(Demand) == 7)
 State = int     # the number of bottles we hold
 Action = int    # the number of bottles we order
 Day = int       # the day we're ordering the bottles on
+Communication = int
 
-def BottlesStored(s: State, a: Action, t: Day):
-    return clamp(0, s + a - BottlesSold(s, a, t), FRIDGE_CAPACITY)
+def BottlesStored(s: State, a: Action, t: Day, d: Demand):
+    return clamp(0, s + a - BottlesSold(s, a, t, d), FRIDGE_CAPACITY)
  
-def BottlesSold(s: State, a: Action, t: Day): 
+def BottlesSold(s: State, a: Action, t: Day, d: Demand): 
     # we either sell what is demanded, or sell our entire supply
-    global Demand
-    print(Demand)
-    return min(Demand[t], s + a)
+    return min(d[t], s + a)
 
 def CostOfDelivery(a: Action):
     if a > 0: 
@@ -83,44 +84,36 @@ def CostOfDelivery(a: Action):
     else: 
         return 0
 
-@lru_cache(maxsize=4096)
-def Profit(s: State, t: Day):
-    if t == LAST_DAY + 1:
-        return 0
-
+def OptimalCost(s: State, t: Day, d: Demand, c: Communication):
     return max(
         -CostOfDelivery(a)
         +
-        (RETAIL_PRICE * BottlesSold(s, a, t))
+        (RETAIL_PRICE * BottlesSold(s, a, t, d))
         + 
         Profit(
-            s=BottlesStored(s, a, t),
-            t=(t + 1) # check the next day
+            s=BottlesStored(s, a, t, d),
+            t=(t + 1), # check the next day
+            c=c
         )
         # range is non-inclusive of the maxval, hence the + 1
         for a in range(MAXIMUM_DELIVERY_SIZE + 1)
     )
 
-p = Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY)
+
+@lru_cache(maxsize=4096)
+def Profit(s: State, t: Day, c: Communication):
+    if t == LAST_DAY + 1:
+        return 0
+
+    if c == 9:
+        return OptimalCost(s, t, RegularDemand, c)
+    elif c == 10:
+        return (1 - CHANCE_OF_HIGHER_DEMAND) * OptimalCost(s, t, RegularDemand, c) +\
+        (CHANCE_OF_HIGHER_DEMAND) * OptimalCost(s, t, HighDemand, c)
+
+
+p = Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY, 9)
 print(f"Communication 9 - Profit is {p}")
 
-################################################################################
-################################################################################
-
-HIGH_DEMAND_TABLE = """
-Day	1	2	3	4	5	6	7
-Regular Demand	7	8	11	11	4	5	11
-High Demand	13	12	15	13	9	9	18
-"""
-
-HighDemand = [ int(i) for i in tabulate(HIGH_DEMAND_TABLE)[2][1:] ]
-
-assert(len(Demand) == 7)
-
-Demand = [ 
-    d * (1 - CHANCE_OF_HIGHER_DEMAND) + h * CHANCE_OF_HIGHER_DEMAND 
-    for (d, h) in zip(Demand, HighDemand)
-]
-
-p = Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY)
+p = Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY, 10)
 print(f"Communication 10 - Profit is {p}")
