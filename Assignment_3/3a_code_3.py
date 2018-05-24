@@ -71,45 +71,40 @@ Action = int    # the number of bottles we order
 Day = int       # the day we're ordering the bottles on
 Communication = int
 
-def BottlesStored(s: State, a: Action, t: Day, d: Demand):
-    return clamp(0, s + a - BottlesSold(s, a, t, d), FRIDGE_CAPACITY)
- 
-def BottlesSold(s: State, a: Action, t: Day, d: Demand): 
-    # we either sell what is demanded, or sell our entire supply
-    return min(d[t], s + a)
-
 def CostOfDelivery(a: Action):
     if a > 0: 
         return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * a
     else: 
         return 0
 
-def OptimalCost(s: State, t: Day, d: Demand, c: Communication):
-    return max(
-        -CostOfDelivery(a)
-        +
-        (RETAIL_PRICE * BottlesSold(s, a, t, d))
-        + 
-        Profit(
-            s=BottlesStored(s, a, t, d),
-            t=(t + 1), # check the next day
-            c=c
-        )
-        # range is non-inclusive of the maxval, hence the + 1
-        for a in range(MAXIMUM_DELIVERY_SIZE + 1)
-    )
-
-
 @lru_cache(maxsize=4096)
 def Profit(s: State, t: Day, c: Communication):
+    def ChooseAction(d: Demand):
+        def PerformAction(a: Action):
+            # we either sell what is demanded, or sell our entire supply
+            to_sell = min(d[t], s + a)
+            to_store = clamp(0, s + a - to_sell, FRIDGE_CAPACITY)
+
+            return -CostOfDelivery(a) + (RETAIL_PRICE * to_sell) + Profit(
+                    s=to_store,
+                    t=(t + 1), # check the next day
+                    c=c
+            )
+
+        return max(
+            PerformAction(a)
+            # range is non-inclusive of the maxval, hence the + 1
+            for a in range(MAXIMUM_DELIVERY_SIZE + 1)
+        )
+
     if t == LAST_DAY + 1:
         return 0
 
     if c == 9:
-        return OptimalCost(s, t, RegularDemand, c)
+        return ChooseAction(RegularDemand)
     elif c == 10:
-        return (1 - CHANCE_OF_HIGHER_DEMAND) * OptimalCost(s, t, RegularDemand, c) +\
-        (CHANCE_OF_HIGHER_DEMAND) * OptimalCost(s, t, HighDemand, c)
+        return (1 - CHANCE_OF_HIGHER_DEMAND) * ChooseAction(RegularDemand) +\
+        (CHANCE_OF_HIGHER_DEMAND) * ChooseAction(HighDemand)
 
 
 p = Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY, 9)
