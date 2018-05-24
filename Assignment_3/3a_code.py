@@ -94,10 +94,8 @@ def cost_of_delivery(o: Ordered):
 def apply_discount(s: Discount):
     return (RETAIL_PRICE * (1 - DISCOUNT)) if s else RETAIL_PRICE
 
-def estimate_chance_of_higher_demand(i: Discount):
-    return CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if i else CHANCE_OF_HIGHER_DEMAND
-
-cache = {}
+def estimate_chance_of_higher_demand(s: Discount):
+    return CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if s else CHANCE_OF_HIGHER_DEMAND
 
 def will_sell(s: State, a: Action, demand):
     (bottles, day) = s
@@ -126,6 +124,7 @@ def C(s: State, a: Action, demand: Demand, c: Communication):
 
     return (retail_price * sold) - cost_of_delivery(ordered) + v_1
 
+cache = {}
 
 def V(s: State, c: Communication):
     if (s, c) in cache:
@@ -164,16 +163,16 @@ def V(s: State, c: Communication):
 # RESULTS #
 ###########
 
-def greedy_probe(s: State, c: Communication):
+def probe_optimal(s: State, c: Communication):
     (v, a) = cache[s, c]
 
     print("When in state", s, "perform action", a)
 
     if s.day != LAST_DAY:
-        greedy_probe(S(s, a, RegularDemand), c)
+        probe_optimal(S(s, a, RegularDemand), c)
 
         if c != 9:
-            greedy_probe(S(s, a, HighDemand), c)
+            probe_optimal(S(s, a, HighDemand), c)
 
 
 for (comm, expected) in [
@@ -184,4 +183,4 @@ for (comm, expected) in [
     p = V(INITIAL_STATE, comm)
     print(f"Communication {comm} - Profit is {p[0]}")
     assert(round(p[0], 2) == expected)
-    greedy_probe(INITIAL_STATE, comm)
+    probe_optimal(INITIAL_STATE, comm)
