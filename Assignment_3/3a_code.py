@@ -138,7 +138,7 @@ def V(s: State, c: Communication):
         )
     else:
         discount_actions = [True, False] if c == 11 else [False]
-        actions = [ Action(ordered=o, discount=i) for o in order_actions for i in discount_actions]
+        actions = [ Action(ordered=o, discount=d) for o in order_actions for d in discount_actions]
 
         cache[(s, c)] = max(
             (
