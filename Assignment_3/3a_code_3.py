@@ -5,7 +5,6 @@ __author__  = "Maxwell Bo, Chantel Morris"
 from functools import lru_cache
 from typing import List
 import itertools
-import math
 
 #########
 # UTILS #
@@ -82,12 +81,17 @@ Day = int       # the day we're ordering the bottles on
 Communication = int
 Discount = bool
 
-def CostOfDelivery(a: Ordered):
+def cost_of_delivery(a: Ordered):
     if a > 0: 
         return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * a
     else: 
         return 0
 
+def apply_discount(s: Discount):
+    return (RETAIL_PRICE * (1 - DISCOUNT)) if s else RETAIL_PRICE
+
+def estimate_chance_of_higher_demand(i: Discount):
+    return CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if i else CHANCE_OF_HIGHER_DEMAND
 
 @lru_cache(maxsize=4096)
 def V(s: State, t: Day, c: Communication):
@@ -96,13 +100,13 @@ def V(s: State, t: Day, c: Communication):
         to_sell = min(d[t], s + o)
         to_store = clamp(0, s + o - to_sell, FRIDGE_CAPACITY)
 
-        retail_price = (RETAIL_PRICE * (1 - DISCOUNT)) if i else RETAIL_PRICE
+        retail_price = apply_discount(i) 
 
         return (retail_price * to_sell) + V(
                 s=to_store,
                 t=(t + 1), # check the next day
                 c=c
-        ) - CostOfDelivery(o)
+        ) - cost_of_delivery(o)
 
     if t == LAST_DAY + 1:
         return 0
