@@ -8,7 +8,7 @@ from functools import lru_cache
 # UTILS #
 #########
 
-Days = range(1, 8)
+Days = range(1, 7 + 1)
 T = range(len(Days))
 
 FIRST_DAY = T[0]
@@ -29,7 +29,6 @@ BASE_DELIVERY_COST = 10
 
 # e Bottle delivery cost ($)
 PER_BOTTLE_DELIVERY_COST = 1.50
-# NB: we're converting int because we don't want floating point instabilities
 
 # r Bottle retail price ($)
 RETAIL_PRICE = 5
@@ -54,7 +53,6 @@ Demand	7	8	11	11	4	5	11
 
 # d_t Demand of bottles for each day t in T
 Demand = [ int(i) for i in tabulate(DEMAND_TABLE)[1][1:] ]
-
 assert(len(Demand) == 7)
 
 #########
@@ -69,10 +67,10 @@ def BottlesStored(s: State, a: Action, t: Day):
     return clamp(0, s + a - BottlesSold(s, a, t), FRIDGE_CAPACITY)
 
 def BottlesSold(s: State, a: Action, t: Day): 
+    # we either sell what is demanded, or sell our entire supply
     return min(Demand[t], s + a)
 
 def CostOfDelivery(a: Action):
-    assert(a <= MAXIMUM_DELIVERY_SIZE)
     if a > 0: 
         return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * a
     else: 
@@ -96,4 +94,4 @@ def Profit(s: State, t: Day):
         for a in range(MAXIMUM_DELIVERY_SIZE + 1)
     )
 
-print(Profit(BASE_DELIVERY_COST, FIRST_DAY))
+print(Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY))
