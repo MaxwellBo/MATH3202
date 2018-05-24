@@ -5,6 +5,8 @@ __author__  = "Maxwell Bo, Chantel Morris"
 from functools import lru_cache
 from typing import List
 import itertools
+from collections import namedtuple
+import inspect
 
 #########
 # UTILS #
@@ -60,7 +62,6 @@ DISCOUNT = 0.1
 # p Chance of a high demand day post discount
 CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT = 0.8
 
-
 ########
 # DATA #
 ########
@@ -75,9 +76,8 @@ HighDemand: Demand = [ int(i) for i in tabulate(DEMAND_TABLE)[2][1:] ]
 # FUNCS #
 #########
 
-State = int     # the number of bottles we hold
-Ordered = int   # the number of bottles we order
-Day = int       # the day we're ordering the bottles on
+State = namedtuple('State', ['bottles', 'day'])
+Action = namedtuple('Action', ['ordered', 'discount'])
 Communication = int
 Discount = bool
 
@@ -93,49 +93,77 @@ def apply_discount(s: Discount):
 def estimate_chance_of_higher_demand(i: Discount):
     return CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if i else CHANCE_OF_HIGHER_DEMAND
 
-@lru_cache(maxsize=4096)
-def V(s: State, t: Day, c: Communication):
-    def T(o: Ordered, d: Demand, i: Discount):
-        # we either sell what is demanded, or sell our entire supply
-        to_sell = min(d[t], s + o)
-        to_store = clamp(0, s + o - to_sell, FRIDGE_CAPACITY)
+cache = {}
 
-        retail_price = apply_discount(i) 
+def will_sell(s: State, a: Action, demand):
+    (bottles, day) = s
+    (ordered, discount) = a
 
-        return (retail_price * to_sell) + V(
-                s=to_store,
-                t=(t + 1), # check the next day
-                c=c
-        ) - cost_of_delivery(o)
+    return min(demand[day], bottles + ordered)
 
-    if t == LAST_DAY + 1:
-        return 0
+def S(s: State, a: Action, demand: Demand):
+    (bottles, day) = s
+    (ordered, discount) = a
 
+    sold = will_sell(s, a, demand)
+    to_store = clamp(0, bottles + ordered - sold, FRIDGE_CAPACITY)
+
+    return State(bottles=to_store, day=day + 1)
+
+def C(s: State, a: Action, demand: Demand, c: Communication):
+    # we either sell what is demanded, or sell our entire supply
+    (ordered, discount) = a
+
+    retail_price = apply_discount(discount) 
+    sold = will_sell(s, a, demand)
+
+    return (retail_price * sold) + V(
+            s=S(s, a, demand),
+            c=c
+    )[0] - cost_of_delivery(ordered)
+
+
+def V(s: State, c: Communication):
+    if (s, c) in cache:
+        return cache[s, c]
+
+    if s.day == LAST_DAY + 1:
+        return (0, None)
+
+    # range is non-inclusive of the maxval, hence the + 1
     order_actions = range(MAXIMUM_DELIVERY_SIZE + 1)
     discount_actions = [True, False] if c == 11 else [False]
 
     if c == 9:
-        return max(
-            T(o, RegularDemand, False)
-            # range is non-inclusive of the maxval, hence the + 1
-            for o in order_actions
+        actions = [ Action(ordered=o, discount=False) for o in order_actions ]
+
+        cache[(s, c)] = max(
+            (C(s, a, RegularDemand, c), a)
+            for a in actions
         )
     else:
-        return max(
-            (1 - estimate_chance_of_higher_demand(i)) * T(o, RegularDemand, i) +\
-                 estimate_chance_of_higher_demand(i)  * T(o, HighDemand, i)
-            for o in order_actions for i in discount_actions
+        actions = [ Action(ordered=o, discount=i) for o in order_actions for i in discount_actions]
+
+        cache[(s, c)] = max(
+            (
+                (1 - estimate_chance_of_higher_demand(a.discount)) * C(s, a, RegularDemand, c) +\
+                    estimate_chance_of_higher_demand(a.discount)  * C(s, a, HighDemand, c)
+                ,
+                a
+            )
+            for a in actions
         )
 
+    return cache[s, c]
 
-p = V(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY, 9)
-assert(p == 156.0)
-print(f"Communication 9 - Profit is {p}")
+p = V(State(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY), 9)
+print(f"Communication 9 - Profit is {p[0]}")
+assert(p[0] == 156.0)
 
-p = V(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY, 10)
-assert(round(p, 2) == 180.47)
+p = V(State(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY), 10)[0]
 print(f"Communication 10 - Profit is {round(p, 2)}")
+assert(round(p, 2) == 180.47)
 
-p = V(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY, 11)
-assert(round(p, 2) == 189.91)
+p = V(State(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY), 11)[0]
 print(f"Communication 11 - Profit is {round(p, 2)}")
+assert(round(p, 2) == 189.91)
