@@ -116,9 +116,9 @@ def V(s: State, t: Day, c: Communication):
 
     if c == 9:
         return max(
-            T(o, RegularDemand, i)
+            T(o, RegularDemand, False)
             # range is non-inclusive of the maxval, hence the + 1
-            for o in order_actions for i in discount_actions
+            for o in order_actions
         )
     else:
         return max(
