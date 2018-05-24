@@ -117,10 +117,10 @@ def C(s: State, a: Action, demand: Demand, c: Communication):
     retail_price = apply_discount(discount) 
     sold = will_sell(s, a, demand)
 
-    return (retail_price * sold) + V(
-            s=S(s, a, demand),
-            c=c
-    )[0] - cost_of_delivery(ordered)
+    s_1 = S(s, a, demand)
+    v_1 =  V(s=s_1, c=c)[0]
+
+    return (retail_price * sold) - cost_of_delivery(ordered) + v_1
 
 
 def V(s: State, c: Communication):
@@ -132,7 +132,6 @@ def V(s: State, c: Communication):
 
     # range is non-inclusive of the maxval, hence the + 1
     order_actions = range(MAXIMUM_DELIVERY_SIZE + 1)
-    discount_actions = [True, False] if c == 11 else [False]
 
     if c == 9:
         actions = [ Action(ordered=o, discount=False) for o in order_actions ]
@@ -142,6 +141,7 @@ def V(s: State, c: Communication):
             for a in actions
         )
     else:
+        discount_actions = [True, False] if c == 11 else [False]
         actions = [ Action(ordered=o, discount=i) for o in order_actions for i in discount_actions]
 
         cache[(s, c)] = max(
