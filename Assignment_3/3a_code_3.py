@@ -24,15 +24,15 @@ def clamp(minn, n, maxn):
 # CONSTANTS #
 #############
 
-# b Base delivery cost (cents)
-BASE_DELIVERY_COST = 10 * 100
+# b Base delivery cost ($)
+BASE_DELIVERY_COST = 10
 
-# e Bottle delivery cost (cents)
-PER_BOTTLE_DELIVERY_COST = int(1.50 * 100)
+# e Bottle delivery cost ($)
+PER_BOTTLE_DELIVERY_COST = 1.50
 # NB: we're converting int because we don't want floating point instabilities
 
-# r Bottle retail price (cents)
-RETAIL_PRICE = 5 * 100
+# r Bottle retail price ($)
+RETAIL_PRICE = 5
 
 # i Number of bottles in the fridge on day 1
 INITIAL_NUMBER_OF_BOTTLES = 0
@@ -71,7 +71,7 @@ def BottlesStored(s: State, a: Action, t: Day):
 def BottlesSold(s: State, a: Action, t: Day): 
     return min(Demand[t], s + a)
 
-def CostOfDelivery(s: State, a: Action, t: Action):
+def CostOfDelivery(a: Action):
     assert(a <= MAXIMUM_DELIVERY_SIZE)
     if a > 0: 
         return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * a
@@ -84,7 +84,7 @@ def Profit(s: State, t: Day):
         return 0
 
     return max(
-        -CostOfDelivery(s, a, t)
+        -CostOfDelivery(a)
         +
         (RETAIL_PRICE * BottlesSold(s, a, t))
         + 
@@ -96,4 +96,4 @@ def Profit(s: State, t: Day):
         for a in range(MAXIMUM_DELIVERY_SIZE + 1)
     )
 
-print(Profit(BASE_DELIVERY_COST, FIRST_DAY) / 100)
+print(Profit(BASE_DELIVERY_COST, FIRST_DAY))
