@@ -25,6 +25,15 @@ def clamp(minn, n, maxn):
 # CONSTANTS #
 #############
 
+DEMAND_TABLE = """
+Day	1	2	3	4	5	6	7
+Regular Demand	7	8	11	11	4	5	11
+High Demand	13	12	15	13	9	9	18
+"""
+
+# m Maximum number of bottles that can be sold
+MAXIMUM_DELIVERY_SIZE = 15
+
 # b Base delivery cost ($)
 BASE_DELIVERY_COST = 10
 
@@ -40,17 +49,15 @@ INITIAL_NUMBER_OF_BOTTLES = 0
 # c Number of bottles fridge can hold
 FRIDGE_CAPACITY = 10
 
-# m Maximum number of bottles that can be sold
-MAXIMUM_DELIVERY_SIZE = 15
-
-DEMAND_TABLE = """
-Day	1	2	3	4	5	6	7
-Regular Demand	7	8	11	11	4	5	11
-High Demand	13	12	15	13	9	9	18
-"""
-
 # h Chance of having higher demand than usual
 CHANCE_OF_HIGHER_DEMAND = 0.4
+
+# d Discount on the retail price
+DISCOUNT = 0.1
+
+# p Chance of a high demand day post discount
+CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT = 0.8
+
 
 ########
 # DATA #
@@ -79,32 +86,33 @@ def CostOfDelivery(a: Action):
 
 @lru_cache(maxsize=4096)
 def Profit(s: State, t: Day, c: Communication):
-    def ChooseAction(d: Demand):
-        def PerformAction(a: Action):
-            # we either sell what is demanded, or sell our entire supply
-            to_sell = min(d[t], s + a)
-            to_store = clamp(0, s + a - to_sell, FRIDGE_CAPACITY)
+    def PerformAction(a: Action, d: Demand):
+        # we either sell what is demanded, or sell our entire supply
+        to_sell = min(d[t], s + a)
+        to_store = clamp(0, s + a - to_sell, FRIDGE_CAPACITY)
 
-            return -CostOfDelivery(a) + (RETAIL_PRICE * to_sell) + Profit(
-                    s=to_store,
-                    t=(t + 1), # check the next day
-                    c=c
-            )
-
-        return max(
-            PerformAction(a)
-            # range is non-inclusive of the maxval, hence the + 1
-            for a in range(MAXIMUM_DELIVERY_SIZE + 1)
+        return -CostOfDelivery(a) + (RETAIL_PRICE * to_sell) + Profit(
+                s=to_store,
+                t=(t + 1), # check the next day
+                c=c
         )
 
     if t == LAST_DAY + 1:
         return 0
 
     if c == 9:
-        return ChooseAction(RegularDemand)
+        return max(
+            PerformAction(a, RegularDemand)
+            # range is non-inclusive of the maxval, hence the + 1
+            for a in range(MAXIMUM_DELIVERY_SIZE + 1)
+        )
     elif c == 10:
-        return (1 - CHANCE_OF_HIGHER_DEMAND) * ChooseAction(RegularDemand) +\
-        (CHANCE_OF_HIGHER_DEMAND) * ChooseAction(HighDemand)
+        return max(
+            (1 - CHANCE_OF_HIGHER_DEMAND) * PerformAction(a, RegularDemand) +\
+                    (CHANCE_OF_HIGHER_DEMAND) * PerformAction(a, HighDemand)
+            # range is non-inclusive of the maxval, hence the + 1
+            for a in range(MAXIMUM_DELIVERY_SIZE + 1)
+        )
 
 
 p = Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY, 9)
