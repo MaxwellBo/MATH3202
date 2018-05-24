@@ -72,12 +72,16 @@ Demand = List[int]
 RegularDemand: Demand = [ int(i) for i in tabulate(DEMAND_TABLE)[1][1:] ]
 HighDemand: Demand = [ int(i) for i in tabulate(DEMAND_TABLE)[2][1:] ]
 
-#########
-# FUNCS #
-#########
+########
+# MAIN #
+########
 
 State = namedtuple('State', ['bottles', 'day'])
+INITIAL_STATE = State(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY)
+
 Action = namedtuple('Action', ['ordered', 'discount'])
+
+Ordered = int
 Communication = int
 Discount = bool
 
@@ -99,6 +103,7 @@ def will_sell(s: State, a: Action, demand):
     (bottles, day) = s
     (ordered, discount) = a
 
+    # we either sell what is demanded, or sell our entire supply
     return min(demand[day], bottles + ordered)
 
 def S(s: State, a: Action, demand: Demand):
@@ -111,14 +116,13 @@ def S(s: State, a: Action, demand: Demand):
     return State(bottles=to_store, day=day + 1)
 
 def C(s: State, a: Action, demand: Demand, c: Communication):
-    # we either sell what is demanded, or sell our entire supply
     (ordered, discount) = a
 
     retail_price = apply_discount(discount) 
     sold = will_sell(s, a, demand)
 
     s_1 = S(s, a, demand)
-    v_1 =  V(s=s_1, c=c)[0]
+    v_1 = V(s=s_1, c=c)[0]
 
     return (retail_price * sold) - cost_of_delivery(ordered) + v_1
 
@@ -156,14 +160,28 @@ def V(s: State, c: Communication):
 
     return cache[s, c]
 
-p = V(State(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY), 9)
-print(f"Communication 9 - Profit is {p[0]}")
-assert(p[0] == 156.0)
+###########
+# RESULTS #
+###########
 
-p = V(State(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY), 10)[0]
-print(f"Communication 10 - Profit is {round(p, 2)}")
-assert(round(p, 2) == 180.47)
+def greedy_probe(s: State, c: Communication):
+    (v, a) = cache[INITIAL_STATE, c]
 
-p = V(State(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY), 11)[0]
-print(f"Communication 11 - Profit is {round(p, 2)}")
-assert(round(p, 2) == 189.91)
+    print("When in state", s, "perform action", a)
+
+    if s.day != LAST_DAY:
+        greedy_probe(S(s, a, RegularDemand), c)
+
+        if c != 9:
+            greedy_probe(S(s, a, HighDemand), c)
+
+
+for (comm, expected) in [
+    (9, 156.0), 
+    (10, 180.47),
+    (11, 189.91)
+]:
+    p = V(INITIAL_STATE, comm)
+    print(f"Communication {comm} - Profit is {p[0]}")
+    assert(round(p[0], 2) == expected)
+    greedy_probe(INITIAL_STATE, comm)
