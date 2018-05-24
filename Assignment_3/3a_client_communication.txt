@@ -1,8 +1,12 @@
+May 4th, 2018
+
+Attention: Maxwell Bo
+
 Communication 9
 We’d like to help some of our smaller customers manage their stock and orders with us. For example, Jenny’s Juices is a corner store which has a small fridge set aside for displaying our famous Orchard Medley product. The fridge can hold 10 bottles and for the next week they expect the follow daily demands (the maximum number of bottles that can be sold on that day):
 
 Day	1	2	3	4	5	6	7
-Demand	6	11	11	5	6	5	10
+Demand	7	8	11	11	4	5	11
 Each evening they can put an order in with us for a delivery of up to 15 bottles the next morning. These deliveries cost $10.00 plus $1.50 per bottle, with a maximum of 15 bottles in a delivery. They then sell the bottles for the retail price of $5.00 each.
 
 If they end up with any bottles left at the end of a day that do not fit into their fridge then they have to discard them.
@@ -10,3 +14,24 @@ If they end up with any bottles left at the end of a day that do not fit into th
 Assuming the fridge is empty on the evening before Day 1, and anything left after Day 7 will be wasted, how should they plan their orders for the next week?
 
 Please provide us with the maximum profit Jenny’s Juices can obtain:
+
+$156.00
+
+Communication 10
+Jenny’s Juices have realized that each day has a 40% chance of having a higher demand than usual, with the number of bottles they can sell given in the following table:
+
+Day	1	2	3	4	5	6	7
+Regular Demand	7	8	11	11	4	5	11
+High Demand	13	12	15	13	9	9	18
+Unfortunately, they don’t know when placing their orders with us whether they will have regular or high demand the next day.
+
+How should Jenny’s Juices plan their orders for the next week? Please provide us with the maximum expected profit they can obtain:
+
+$180.47
+
+Communication 11
+Jenny’s Juices have asked us for advice about increasing sales. Our market research suggests that by offering a 10% discount on the retail price, the chance of a high demand day increases to 80%.
+
+If they want to try this approach, how should they plan the days they offer the discount in the next week and how much effect will this have on their expected profit?
+
+We look forward to reading your report.
