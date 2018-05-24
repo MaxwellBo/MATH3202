@@ -165,7 +165,7 @@ def V(s: State, c: Communication):
 ###########
 
 def greedy_probe(s: State, c: Communication):
-    (v, a) = cache[INITIAL_STATE, c]
+    (v, a) = cache[s, c]
 
     print("When in state", s, "perform action", a)
 
