@@ -81,9 +81,9 @@ Day = int       # the day we're ordering the bottles on
 Communication = int
 Discount = bool
 
-def cost_of_delivery(a: Ordered):
-    if a > 0: 
-        return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * a
+def cost_of_delivery(o: Ordered):
+    if o > 0: 
+        return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * o
     else: 
         return 0
 
@@ -111,26 +111,29 @@ def V(s: State, t: Day, c: Communication):
     if t == LAST_DAY + 1:
         return 0
 
+    order_actions = range(MAXIMUM_DELIVERY_SIZE + 1)
+    discount_actions = [True, False] if c == 11 else [False]
+
     if c == 9:
         return max(
-            T(a, RegularDemand, False)
+            T(o, RegularDemand, False)
             # range is non-inclusive of the maxval, hence the + 1
-            for a in range(MAXIMUM_DELIVERY_SIZE + 1)
+            for o in order_actions for i in [False]
         )
     elif c == 10:
         return max(
-            (1 - CHANCE_OF_HIGHER_DEMAND) * T(a, RegularDemand, False) +\
-                    (CHANCE_OF_HIGHER_DEMAND) * T(a, HighDemand, False)
+            (1 - CHANCE_OF_HIGHER_DEMAND) * T(o, RegularDemand, False) +\
+                    (CHANCE_OF_HIGHER_DEMAND) * T(o, HighDemand, False)
             # range is non-inclusive of the maxval, hence the + 1
-            for a in range(MAXIMUM_DELIVERY_SIZE + 1)
+            for o in range(MAXIMUM_DELIVERY_SIZE + 1)
         )
     elif c == 11:
         return max(
-            (1 - (CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if i else CHANCE_OF_HIGHER_DEMAND)) * T(a, RegularDemand, i) +\
+            (1 - (CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if i else CHANCE_OF_HIGHER_DEMAND)) * T(o, RegularDemand, i) +\
                     (CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if i else CHANCE_OF_HIGHER_DEMAND) * \
-                    T(a, HighDemand, i)
+                    T(o, HighDemand, i)
             # range is non-inclusive of the maxval, hence the + 1
-            for a in range(MAXIMUM_DELIVERY_SIZE + 1) for i in [True, False]
+            for o in range(MAXIMUM_DELIVERY_SIZE + 1) for i in [True, False]
         )
 
 
