@@ -66,12 +66,13 @@ Action = int    # the number of bottles we order
 Day = int       # the day we're ordering the bottles on
 
 def BottlesStored(s: State, a: Action, t: Day):
-    return clamp(0, s + a - Demand[t], FRIDGE_CAPACITY)
+    return clamp(0, s + a - BottlesSold(s, a, t), FRIDGE_CAPACITY)
 
 def BottlesSold(s: State, a: Action, t: Day): 
-    return s - BottlesStored(s, a, t) 
+    return min(Demand[t], s + a)
 
 def CostOfDelivery(s: State, a: Action, t: Action):
+    assert(a <= MAXIMUM_DELIVERY_SIZE)
     if a > 0: 
         return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * a
     else: 
@@ -79,14 +80,13 @@ def CostOfDelivery(s: State, a: Action, t: Action):
 
 @lru_cache(maxsize=4096)
 def Profit(s: State, t: Day):
-    print(t)
     if t == LAST_DAY + 1:
         return 0
 
     return max(
+        -CostOfDelivery(s, a, t)
+        +
         (RETAIL_PRICE * BottlesSold(s, a, t))
-        - 
-        CostOfDelivery(s, a, t)
         + 
         Profit(
             s=BottlesStored(s, a, t),
@@ -96,4 +96,4 @@ def Profit(s: State, t: Day):
         for a in range(MAXIMUM_DELIVERY_SIZE + 1)
     )
 
-print(Profit(BASE_DELIVERY_COST, FIRST_DAY))
+print(Profit(BASE_DELIVERY_COST, FIRST_DAY) / 100)
