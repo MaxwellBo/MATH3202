@@ -2,8 +2,8 @@ __author__  = "Maxwell Bo, Chantel Morris"
 
 """Assignment 3 - Dynamic Programming - Section A"""
 
-from typing import List
 from collections import namedtuple
+from typing import List
 
 #########
 # UTILS #
@@ -63,11 +63,9 @@ CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT = 0.8
 # DATA #
 ########
 
-Demand = List[int]
 # d_t Demand of bottles for each day t in T
-# global Demand # forgive me
-RegularDemand: Demand = [ int(i) for i in tabulate(DEMAND_TABLE)[1][1:] ]
-HighDemand: Demand = [ int(i) for i in tabulate(DEMAND_TABLE)[2][1:] ]
+RegularDemand: List[int] = [ int(i) for i in tabulate(DEMAND_TABLE)[1][1:] ]
+HighDemand: List[int] = [ int(i) for i in tabulate(DEMAND_TABLE)[2][1:] ]
 
 ########
 # MAIN #
@@ -78,30 +76,28 @@ INITIAL_STATE = State(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY)
 
 Action = namedtuple('Action', ['ordered', 'discount'])
 
-Ordered = int
 Communication = int
-Discount = bool
 
-def cost_of_delivery(o: Ordered):
-    if o > 0: 
-        return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * o
+def cost_of_delivery(ordered: int):
+    if ordered > 0: 
+        return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * ordered
     else: 
         return 0
 
-def apply_discount(s: Discount):
-    return (RETAIL_PRICE * (1 - DISCOUNT)) if s else RETAIL_PRICE
+def apply_discount(discount: int):
+    return (RETAIL_PRICE * (1 - DISCOUNT)) if discount else RETAIL_PRICE
 
-def estimate_chance_of_higher_demand(s: Discount):
-    return CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if s else CHANCE_OF_HIGHER_DEMAND
+def estimate_chance_of_higher_demand(discount: int):
+    return CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if discount else CHANCE_OF_HIGHER_DEMAND
 
-def will_sell(s: State, a: Action, demand: Demand):
+def will_sell(s: State, a: Action, demand: List[int]):
     (bottles, day) = s
     (ordered, discount) = a
 
     # we either sell what is demanded, or sell our entire supply
     return min(demand[day], bottles + ordered)
 
-def S(s: State, a: Action, demand: Demand):
+def S(s: State, a: Action, demand: List[int]):
     (bottles, day) = s
     (ordered, discount) = a
 
@@ -110,7 +106,7 @@ def S(s: State, a: Action, demand: Demand):
 
     return State(bottles=to_store, day=day + 1)
 
-def C(s: State, a: Action, demand: Demand, c: Communication):
+def C(s: State, a: Action, demand: List[int], c: Communication):
     (ordered, discount) = a
 
     retail_price = apply_discount(discount) 
