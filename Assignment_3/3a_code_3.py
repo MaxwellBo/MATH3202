@@ -4,6 +4,7 @@ __author__  = "Maxwell Bo, Chantel Morris"
 
 from functools import lru_cache
 from typing import List
+import itertools
 
 #########
 # UTILS #
@@ -53,6 +54,7 @@ FRIDGE_CAPACITY = 10
 CHANCE_OF_HIGHER_DEMAND = 0.4
 
 # d Discount on the retail price
+NO_DISCOUNT = 0
 DISCOUNT = 0.1
 
 # p Chance of a high demand day post discount
@@ -74,44 +76,56 @@ HighDemand: Demand = [ int(i) for i in tabulate(DEMAND_TABLE)[2][1:] ]
 #########
 
 State = int     # the number of bottles we hold
-Action = int    # the number of bottles we order
+Ordered = int   # the number of bottles we order
 Day = int       # the day we're ordering the bottles on
 Communication = int
+Discount = bool
 
-def CostOfDelivery(a: Action):
+def CostOfDelivery(a: Ordered):
     if a > 0: 
         return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * a
     else: 
         return 0
 
+
 @lru_cache(maxsize=4096)
 def Profit(s: State, t: Day, c: Communication):
-    def PerformAction(a: Action, d: Demand):
+    def PerformAction(a: Ordered, d: Demand, i: Discount):
         # we either sell what is demanded, or sell our entire supply
         to_sell = min(d[t], s + a)
         to_store = clamp(0, s + a - to_sell, FRIDGE_CAPACITY)
 
-        return -CostOfDelivery(a) + (RETAIL_PRICE * to_sell) + Profit(
+        retail_price = (RETAIL_PRICE * (1 - DISCOUNT)) if i else RETAIL_PRICE
+
+        return (retail_price * to_sell) + Profit(
                 s=to_store,
                 t=(t + 1), # check the next day
                 c=c
-        )
+        ) - CostOfDelivery(a)
 
     if t == LAST_DAY + 1:
         return 0
 
     if c == 9:
         return max(
-            PerformAction(a, RegularDemand)
+            PerformAction(a, RegularDemand, False)
             # range is non-inclusive of the maxval, hence the + 1
             for a in range(MAXIMUM_DELIVERY_SIZE + 1)
         )
     elif c == 10:
         return max(
-            (1 - CHANCE_OF_HIGHER_DEMAND) * PerformAction(a, RegularDemand) +\
-                    (CHANCE_OF_HIGHER_DEMAND) * PerformAction(a, HighDemand)
+            (1 - CHANCE_OF_HIGHER_DEMAND) * PerformAction(a, RegularDemand, False) +\
+                    (CHANCE_OF_HIGHER_DEMAND) * PerformAction(a, HighDemand, False)
             # range is non-inclusive of the maxval, hence the + 1
             for a in range(MAXIMUM_DELIVERY_SIZE + 1)
+        )
+    elif c == 11:
+        return max(
+            (1 - (CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if i else CHANCE_OF_HIGHER_DEMAND)) * PerformAction(a, RegularDemand, i) +\
+                    (CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if i else CHANCE_OF_HIGHER_DEMAND) * \
+                    PerformAction(a, HighDemand, i)
+            # range is non-inclusive of the maxval, hence the + 1
+            for a in range(MAXIMUM_DELIVERY_SIZE + 1) for i in [True, False]
         )
 
 
@@ -120,3 +134,6 @@ print(f"Communication 9 - Profit is {p}")
 
 p = Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY, 10)
 print(f"Communication 10 - Profit is {p}")
+
+p = Profit(INITIAL_NUMBER_OF_BOTTLES, FIRST_DAY, 11)
+print(f"Communication 11 - Profit is {p}")
