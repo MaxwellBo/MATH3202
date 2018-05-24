@@ -116,24 +116,15 @@ def V(s: State, t: Day, c: Communication):
 
     if c == 9:
         return max(
-            T(o, RegularDemand, False)
+            T(o, RegularDemand, i)
             # range is non-inclusive of the maxval, hence the + 1
-            for o in order_actions for i in [False]
+            for o in order_actions for i in discount_actions
         )
-    elif c == 10:
+    else:
         return max(
-            (1 - CHANCE_OF_HIGHER_DEMAND) * T(o, RegularDemand, False) +\
-                    (CHANCE_OF_HIGHER_DEMAND) * T(o, HighDemand, False)
-            # range is non-inclusive of the maxval, hence the + 1
-            for o in range(MAXIMUM_DELIVERY_SIZE + 1)
-        )
-    elif c == 11:
-        return max(
-            (1 - (CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if i else CHANCE_OF_HIGHER_DEMAND)) * T(o, RegularDemand, i) +\
-                    (CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if i else CHANCE_OF_HIGHER_DEMAND) * \
-                    T(o, HighDemand, i)
-            # range is non-inclusive of the maxval, hence the + 1
-            for o in range(MAXIMUM_DELIVERY_SIZE + 1) for i in [True, False]
+            (1 - estimate_chance_of_higher_demand(i)) * T(o, RegularDemand, i) +\
+                 estimate_chance_of_higher_demand(i)  * T(o, HighDemand, i)
+            for o in order_actions for i in discount_actions
         )
 
 
