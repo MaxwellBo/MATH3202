@@ -22,7 +22,7 @@ def clamp(minn, n, maxn):
     return max(min(maxn, n), minn)
 
 #############
-# CONSTANTS #
+# fANTS #
 #############
 
 DEMAND_TABLE = """
@@ -52,9 +52,9 @@ FRIDGE_CAPACITY = 10
 # h Chance of having higher demand than usual
 CHANCE_OF_HIGHER_DEMAND = 0.4
 
-# z Discount on the retail price
-NO_DISCOUNT = 0
 DISCOUNT = 0.1
+# z Discounted retail price
+DISCOUNTED_PRICE = (RETAIL_PRICE * (1 - DISCOUNT)) 
 
 # p Chance of a high demand day post discount
 CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT = 0.8
@@ -79,19 +79,19 @@ Action = namedtuple('Action', ['ordered', 'discount'])
 
 Communication = int
 
-def cost_of_delivery(ordered: int):
-    if ordered > 0: 
-        return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * ordered
+def cost_of_delivery(a: Action):
+    if a.ordered > 0: 
+        return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * a.ordered
     else: 
         return 0
 
-def apply_discount(discount: int):
-    return (RETAIL_PRICE * (1 - DISCOUNT)) if discount else RETAIL_PRICE
+def has_higher_demand(a: Action):
+    return CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if a.discount else CHANCE_OF_HIGHER_DEMAND
 
-def estimate_chance_of_higher_demand(discount: int):
-    return CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT if discount else CHANCE_OF_HIGHER_DEMAND
+def decide_price(a: Action):
+    return DISCOUNTED_PRICE if a.discount else RETAIL_PRICE
 
-def will_sell(s: State, a: Action, demand: List[int]):
+def decide_sold(s: State, a: Action, demand: List[int]):
     (bottles, day) = s
     (ordered, discount) = a
 
@@ -102,21 +102,19 @@ def S(s: State, a: Action, demand: List[int]):
     (bottles, day) = s
     (ordered, discount) = a
 
-    sold = will_sell(s, a, demand)
+    sold = decide_sold(s, a, demand)
     to_store = clamp(0, bottles + ordered - sold, FRIDGE_CAPACITY)
 
     return State(bottles=to_store, day=day + 1)
 
 def C(s: State, a: Action, demand: List[int], c: Communication):
-    (ordered, discount) = a
-
-    retail_price = apply_discount(discount) 
-    sold = will_sell(s, a, demand)
+    price = decide_price(a)
+    sold = decide_sold(s, a, demand)
 
     s_1 = S(s, a, demand)
     v_1 = V(s=s_1, c=c)[0]
 
-    return (retail_price * sold) - cost_of_delivery(ordered) + v_1
+    return (price * sold) - cost_of_delivery(a) + v_1
 
 cache = {}
 
@@ -143,8 +141,8 @@ def V(s: State, c: Communication):
 
         cache[(s, c)] = max(
             (
-                (1 - estimate_chance_of_higher_demand(a.discount)) * C(s, a, RegularDemand, c) +\
-                     estimate_chance_of_higher_demand(a.discount)  * C(s, a, HighDemand, c)
+                (1 - has_higher_demand(a)) * C(s, a, RegularDemand, c) +\
+                     has_higher_demand(a)  * C(s, a, HighDemand, c)
                 ,
                 a
             )
