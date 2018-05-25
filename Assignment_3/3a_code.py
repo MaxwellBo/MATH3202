@@ -31,7 +31,7 @@ Regular Demand	7	8	11	11	4	5	11
 High Demand	13	12	15	13	9	9	18
 """
 
-# m Maximum number of bottles that can be sold
+# m Maximum number of bottles that can be ordered
 MAXIMUM_DELIVERY_SIZE = 15
 
 # b Base delivery cost ($)
@@ -52,7 +52,7 @@ FRIDGE_CAPACITY = 10
 # h Chance of having higher demand than usual
 CHANCE_OF_HIGHER_DEMAND = 0.4
 
-# d Discount on the retail price
+# z Discount on the retail price
 NO_DISCOUNT = 0
 DISCOUNT = 0.1
 
@@ -64,6 +64,7 @@ CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT = 0.8
 ########
 
 # d_t Demand of bottles on day t in T
+# we've unpacked the the demand array for ease of use
 RegularDemand: List[int] = [ int(i) for i in tabulate(DEMAND_TABLE)[1][1:] ]
 HighDemand: List[int] = [ int(i) for i in tabulate(DEMAND_TABLE)[2][1:] ]
 
@@ -167,12 +168,42 @@ def probe_optimal(s: State, c: Communication):
         if c != 9:
             probe_optimal(S(s, a, HighDemand), c)
 
-# begin{tikzpicture}
-# \node[circle,draw](z){$30$}
-#   child[missing]{}
-#   child{
-#     node[circle,draw]{40} child{node[circle,draw] {20}} child[missing] };
-# \end{tikzpicture}
+
+def gen_table(c: Communication):
+
+    all_states = [ State(bottles=b, day=d) for d in T for b in range(FRIDGE_CAPACITY + 1) ]
+
+    collector = []
+
+    for s in all_states:
+        try:
+            (v, a) = cache[s, c]
+            row =  f" {Days[s.day]} & {s.bottles} & {a.ordered} & {'Yes' if a.discount else 'No'}"
+            collector.append(row)
+        except Exception:
+            pass
+
+    collector.append("")
+
+    builder = "\\subsection*{Communication " +  str(c) + "}"
+
+    builder += """
+    
+    \\begin{longtable}{|p{3cm}|p{3cm}||p{3cm}|p{3cm}|}
+ \hline
+ Day & Bottles & Order & Disount\\\\
+ \hline
+ \hline
+    """
+
+    builder += "\\\\".join(collector)
+
+    builder += """
+ \hline
+\end{longtable}
+    """
+
+    return builder
 
 def gen_graph(s: State, c: Communication):
 
@@ -237,8 +268,5 @@ for (comm, expected) in [
     (11, 189.91)
 ]:
     p = V(INITIAL_STATE, comm)
-    print(f"Communication {comm} - Profit is {p[0]}")
-    assert(round(p[0], 2) == expected)
-    probe_optimal(INITIAL_STATE, comm)
-
-print(gen_graph(INITIAL_STATE, 11))
+    print(gen_table(comm))
+    print(f"Communication {comm} - Profit is ${p[0]}")
