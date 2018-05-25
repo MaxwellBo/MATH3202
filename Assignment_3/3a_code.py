@@ -189,7 +189,7 @@ def gen_table(c: Communication):
 
             try:
                 (v, a) = cache[s, c]
-                contents = str(a.ordered) if c == 10 else str((a.ordered, "Yes" if a.discount else "No"))
+                contents = str(a.ordered) if c == 10 else ('D ' if a.discount else ' ') + str(a.ordered)
                 row.append(contents)
 
             except Exception:
