@@ -155,53 +155,49 @@ def V(s: State, c: Communication):
 # RESULTS #
 ###########
 
-def probe_optimal(s: State, c: Communication):
-    (v, a) = cache[s, c]
+def probe_optimal(c: Communication):
 
-    print("When in state", s, "perform action", a)
+    print("\t".join(i.rjust(6, " ") for i in ["Day", "Bottles", "Order"]))
 
-    if s.day != LAST_DAY:
-        probe_optimal(S(s, a, RegularDemand), c)
+    def go(s: State):
+        (v, a) = cache[s, c]
 
-        if c != 9:
-            probe_optimal(S(s, a, HighDemand), c)
+        print("\t".join(str(i).rjust(6, " ") for i in [Days[s.day], s.bottles, a.ordered]))
+
+        if s.day != LAST_DAY:
+            go(S(s, a, RegularDemand))
+
+            if c != 9:
+                go(S(s, a, HighDemand))
+
+    go(INITIAL_STATE)
 
 
 def gen_table(c: Communication):
+    print("To find the optimal action, index the row with the number of bottles you currently have, and the column with the day")
+    print()
 
     all_states = [ State(bottles=b, day=d) for d in T for b in range(FRIDGE_CAPACITY + 1) ]
 
-    collector = []
+    rows = [[ "", *[ str(Days[d]) for d in T]]]
 
-    for s in all_states:
-        try:
-            (v, a) = cache[s, c]
-            row =  f" {Days[s.day]} & {s.bottles} & {a.ordered} & {'Yes' if a.discount else 'No'}"
-            collector.append(row)
-        except Exception:
-            pass
+    for b in range(FRIDGE_CAPACITY + 1):
+        row = [ str(b) ]
 
-    collector.append("")
+        for d in T:
+            s = State(bottles=b, day=d)
 
-    builder = "\\subsection*{Communication " +  str(c) + "}"
+            try:
+                (v, a) = cache[s, c]
+                contents = str(a.ordered) if c == 10 else str((a.ordered, "Yes" if a.discount else "No"))
+                row.append(contents)
 
-    builder += """
-    
-    \\begin{longtable}{|p{3cm}|p{3cm}||p{3cm}|p{3cm}|}
- \hline
- Day & Bottles & Order & Disount\\\\
- \hline
- \hline
-    """
+            except Exception:
+                row.append('')
 
-    builder += "\\\\".join(collector)
+        rows.append(row)
 
-    builder += """
- \hline
-\end{longtable}
-    """
-
-    return builder
+    print('\n'.join(['\t'.join([cell.rjust(8, ' ') for cell in row]) for row in rows]))
 
 def gen_graph(s: State, c: Communication):
 
@@ -257,7 +253,6 @@ def gen_graph(s: State, c: Communication):
     builder += """;
 \end{tikzpicture}
 """
-
     return builder
 
 for (comm, expected) in [
@@ -266,5 +261,12 @@ for (comm, expected) in [
     (11, 189.91)
 ]:
     p = V(INITIAL_STATE, comm)
-    print(gen_table(comm))
-    print(f"Communication {comm} - Profit is ${p[0]}")
+
+    print(f"Communication {comm} - Profit is ${round(p[0], 2)} \n")
+
+    if comm == 9:
+        probe_optimal(comm)
+    else:
+        gen_table(comm)
+
+    print('\n')
