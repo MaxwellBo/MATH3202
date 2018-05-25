@@ -63,7 +63,7 @@ CHANCE_OF_HIGHER_DEMAND_POST_DISCOUNT = 0.8
 # DATA #
 ########
 
-# d_t Demand of bottles for each day t in T
+# d_t Demand of bottles on day t in T
 RegularDemand: List[int] = [ int(i) for i in tabulate(DEMAND_TABLE)[1][1:] ]
 HighDemand: List[int] = [ int(i) for i in tabulate(DEMAND_TABLE)[2][1:] ]
 
@@ -167,6 +167,69 @@ def probe_optimal(s: State, c: Communication):
         if c != 9:
             probe_optimal(S(s, a, HighDemand), c)
 
+# begin{tikzpicture}
+# \node[circle,draw](z){$30$}
+#   child[missing]{}
+#   child{
+#     node[circle,draw]{40} child{node[circle,draw] {20}} child[missing] };
+# \end{tikzpicture}
+
+def gen_graph(s: State, c: Communication):
+
+    def go(s: State, c: Communication):
+        (v, a) = cache[s, c]
+
+        if s.day != LAST_DAY:
+            left = go(S(s, a, RegularDemand), c)
+            right = go(S(s, a, HighDemand), c)
+
+            builder = "node[circle,draw] {"
+            builder += str((s.bottles, T[s.day]))
+            builder += "} "
+            builder += "edge from parent node[] {"
+            builder += str((a.ordered, a.discount))
+            builder += "}\n"
+
+            if left:
+                builder += "child {"
+                builder += left
+                builder += "}"
+
+            else:
+                builder += "child[missing]{}"
+
+            builder += '\n'
+
+            if right:
+                builder += "child {"
+                builder += right
+                builder += "}"
+            else:
+                builder += "child[missing]{}"
+
+            return builder
+    
+    builder = """\\begin{tikzpicture}[
+  rotate=90,
+  every node/.style={scale=.6},
+  level distance=2cm,
+  level 1/.style={sibling distance=13.6cm},
+  level 2/.style={sibling distance=6.3cm},
+  level 3/.style={sibling distance=3.cm},
+  level 4/.style={sibling distance=1.7cm},
+  level 5/.style={sibling distance=0.7cm}
+  ]{
+    """
+
+    builder += "\\"
+
+    builder += go(s, c)
+
+    builder += """;
+\end{tikzpicture}
+"""
+
+    return builder
 
 for (comm, expected) in [
     (9, 156.0), 
@@ -177,3 +240,5 @@ for (comm, expected) in [
     print(f"Communication {comm} - Profit is {p[0]}")
     assert(round(p[0], 2) == expected)
     probe_optimal(INITIAL_STATE, comm)
+
+print(gen_graph(INITIAL_STATE, 11))
