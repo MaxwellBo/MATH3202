@@ -79,7 +79,7 @@ Action = namedtuple('Action', ['ordered', 'discount'])
 
 Communication = int
 
-def cost_of_delivery(a: Action):
+def delivery_cost(a: Action):
     if a.ordered > 0: 
         return BASE_DELIVERY_COST + PER_BOTTLE_DELIVERY_COST * a.ordered
     else: 
@@ -114,7 +114,7 @@ def C(s: State, a: Action, demand: List[int], c: Communication):
     s_1 = S(s, a, demand)
     v_1 = V(s=s_1, c=c)[0]
 
-    return (price * sold) - cost_of_delivery(a) + v_1
+    return (price * sold) - delivery_cost(a) + v_1
 
 cache = {}
 
