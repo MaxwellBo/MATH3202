@@ -174,9 +174,6 @@ def probe_optimal(c: Communication):
 
 
 def gen_table(c: Communication):
-    print("To find the optimal action, index the row with the number of bottles you currently have, and the column with the day")
-    print()
-
     all_states = [ State(bottles=b, day=d) for d in T for b in range(FRIDGE_CAPACITY + 1) ]
 
     rows = [[ "", *[ str(Days[d]) for d in T]]]
