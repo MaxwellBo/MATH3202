@@ -1,0 +1,166 @@
+\documentclass[a4paper]{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{tikz}
+\usepackage{longtable}
+\usepackage{verbatim}
+\usetikzlibrary{arrows,automata}
+
+\newcommand{\SET}[1]{\{ {#1} \}}
+\newcommand{\TUPLE}[1]{\langle {#1} \rangle}
+
+\title{MATH3202 - Dynamic Programming}
+\author{Maxwell Bo  \and Chantel Morris}
+
+\begin{document} 
+
+\maketitle
+
+\section*{Sets}
+
+\begin{tabular}{rl}
+    $T$ & Set of days\\
+    $L$ & Set of demand levels, \SET{\text{H}, \text{R}}, where H is high and L is low
+\end{tabular}
+
+\section*{Data}
+
+\begin{tabular}{rl}
+$d_{tl}$ & Demand of bottles on day $t \in T$ with $l \in L$ level of demand\\
+$m$ & Maximum number of bottles that can be ordered\\
+$b$ & Base delivery cost (\$)\\
+$e$ & Bottle delivery cost (\$)\\
+$r$ & Bottle retail price (\$)\\
+$i$ & Number of bottles in the fridge on day $first(T)$ \\
+$c$ & Number of bottles fridge can hold\\
+$h$ & Chance of having higher demand than usual, where ``high demand'' is $\text{H} \in L$\\
+$z$ & Discounted price (\$)\\
+$p$ & Chance of a ``high demand'' day post discount, where ``high demand'' is $\text{H} \in L$\\
+\end{tabular}
+
+\subsection*{State}
+
+\begin{tabular}{rl}
+${S_t}_{\text{bottles}}$ & Bottles in fridge at the start of day  $t \in T$
+\end{tabular}
+
+\subsection*{Action}
+
+\begin{tabular}{rl}
+${a_t}_{\text{ordered}}$ & Bottles to order in preparation for day $t \in T$\\
+${a_t}_{\text{discount}}$ & Decision to apply discount of retail price $z$ on day $t \in T$, where $1$ decides to apply the discount
+\end{tabular}
+
+\section*{Constraints}
+
+\begin{align}
+{S_t}_{\text{bottles}} & \in [0, c]   & \forall t \in T \label{C1}\\
+{a_t}_{\text{ordered}} & \in [0, m]   & \forall t \in T \label{C2}\\
+{a_t}_{\text{discount}} & \in \SET{0, 1}   & \forall t \in T \label{C3}
+\end{align}
+
+\begin{itemize}
+    \item Constraint (\ref{C1}) ensures that the bottles stored must be between 0 and the number of bottles that the fridge can hold 
+    \item Constraint (\ref{C2}) ensures Jenny's Juices can only order up to the maximum that can be ordered. In addition no juice can be returned
+    \item Constraint (\ref{C3}) ensures that the discount to retail cost can either apply or not apply.
+\end{itemize}
+
+
+\section*{Functions}
+
+\[
+\text{delivery\_cost}(a_t) = \begin{cases}
+        b + {a_t}_{\text{ordered}} \cdot e, &\mbox{if } {a_t}_{\text{ordered}} > 0\\
+        0, &\mbox{ otherwise.} 
+    \end{cases} 
+    \label{(C1)}
+\]
+
+\[
+\text{decide\_price}(a_t) = \begin{cases}
+        z, &\mbox{if } {a_t}_{\text{discount}} = 1\\
+        r, &\mbox{ otherwise.} 
+    \end{cases} 
+\]
+
+\[\text{decide\_sold}(S_t, a_t, l) = \min(d_{tl}, {S_t}_{\text{bottles}} + {a_t}_{\text{ordered}})\]
+
+\[\text{clamp}_{l}^{h}(x)=\max(l,\min(h,x))\]
+
+\[S^M (S_t, a_t, l) = \text{clamp}_{0}^{c}({s_t}_{\text{bottles}} + {a_t}_{\text{ordered}} - \text{decide\_sold}(S_t, a_t, l))\]
+
+\[C_t(S_t, a_t, l) = (\text{decide\_price}(a_t) \times \text{decide\_sold}(S_t, a_t, l)) - \text{delivery\_cost}(a_t) + V_{t + 1}(S^M (S_t, a_t, l))\]
+
+\begin{itemize}
+\item delivery\_cost details the cost of delivery. If some bottles of juice are ordered, the delivery cost is equal to the wholesale price per bottle for each bottle plus the delivery fee. If no bottle of juice are ordered, there are no delivery fees. 
+\item decide\_price details the price that the juice is sold for. Bottles of juice are either sold at retail cost or discounted cost, if a discount is applied. 
+\item decide\_sold evaluates how much juice is sold on a given day. If the demand is less than the bottles stored added to the bottles order, then Jenny's juices will sell up to the demand of that day. Else, they will sell how much is stored added to how much is ordered for that day. 
+\item The contribution function evaluates the total profit. It is calculated by multiplying the sell price of the juice by the amount of juice sold, plus the value function. The delivery cost of that order is then subtracted. 
+\item The value function for Communication 9 maximises the contribution function in order to evaluate the optimal solution over the period of time. 
+\item The value function for Communication 10 
+	This function maximises the contribution function in order to evaluate the optimal solution over the period of time. Crucially, this function evaluates the contribution function where there is either High or Regular demand. The probability of each scenario is used, where Regular demand is the complementary probability of High demand. 
+\item The value function for Communication 11 function maximises the contribution function in order to evaluate the optimal solution over the period of time. Crucially, this function evaluates the contribution function where there is either High or Regular demand. The probability of each scenario is used, where Regular demand is the complementary probability of High demand. Furthermore, this function optimises the solution in light of the action of whether or not to use a discount. 
+\end{itemize}
+
+\newpage
+
+\section*{Value Functions}
+
+\[
+V_{succ(last(t))}(S_t) =  0
+\]
+
+\subsection*{Communication 9}
+
+\[
+V_t(S_t) = \max_{a_t}\{ C_t(S_t, a_t, R) \}
+\]
+
+where 
+
+\[a_t \in \{ \TUPLE{ \text{ordered} }  \,|\, \text{ordered} \in [0, m] \} \]
+
+
+\subsection*{Communication 10}
+
+\[
+\text{has\_higher\_demand}(a_t) = \begin{cases}
+        p, &\mbox{if } {a_t}_{\text{discount}} = 1\\
+        h, &\mbox{ otherwise.} 
+    \end{cases} 
+\]
+
+\[
+V_t(S_t) = \max_{a_t}\{ ((1 - \text{has\_higher\_demand}(a_t)) \times C_t(S_t, a_t, R)) + (\text{has\_higher\_demand}(a_t) \times C_t(S_t, a_t, H)\}
+\]
+
+where 
+
+\[a_t \in \{ \TUPLE{ \text{ordered}, \text{discount} }  \,|\, \text{ordered} \in [0, m], \text{discount} \in \SET{0} \} \]
+
+
+\subsection*{Communication 11}
+
+\[
+V_t(S_t) = \max_{a_t}\{ ((1 - \text{has\_higher\_demand}(a_t)) \times C_t(S_t, a_t, R)) + (\text{has\_higher\_demand}(a_t) \times C_t(S_t, a_t, H)\}
+\]
+
+where
+
+\[a_t \in \{ \TUPLE{ \text{ordered}, \text{discount} }  \,|\, \text{ordered} \in [0, m], \text{discount} \in \SET{0, 1} \} \]
+
+
+
+\begin{tabular}{rl}
+\end{tabular}
+
+
+
+\newpage
+
+\section*{Results}
+
+\verbatiminput{3a_output.txt}
+
+\end{document}
