@@ -22,7 +22,7 @@ def clamp(minn, n, maxn):
     return max(min(maxn, n), minn)
 
 #############
-# fANTS #
+# CONSTANTS #
 #############
 
 DEMAND_TABLE = """
