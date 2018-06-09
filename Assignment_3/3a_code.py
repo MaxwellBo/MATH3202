@@ -98,7 +98,7 @@ def decide_sold(s: State, a: Action, demand: List[int]):
     # we either sell what is demanded, or sell our entire supply
     return min(demand[day], bottles + ordered)
 
-def S(s: State, a: Action, demand: List[int]):
+def S(s: State, a: Action, demand: List[int]) -> State:
     (bottles, day) = s
     (ordered, discount) = a
 
@@ -107,7 +107,7 @@ def S(s: State, a: Action, demand: List[int]):
 
     return State(bottles=to_store, day=day + 1)
 
-def C(s: State, a: Action, demand: List[int], c: Communication):
+def C(s: State, a: Action, demand: List[int], c: Communication) -> int:
     price = decide_price(a)
     sold = decide_sold(s, a, demand)
 

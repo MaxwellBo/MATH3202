@@ -14,12 +14,14 @@ Action = str
 
 cache = {}
 
-def S(s: State, a: Action, card: int):
-    cards_1 = s.cards - {c}
+def S(s: State, a: Action, card: int) -> State:
+    cards_1 = s.cards - {card}
+
+    go = s.grid._asdict()
+    go[a] = card
 
     grid_1 = Grid(
-        **s.grid._asdict() # copy the old grid
-        **{ a: card } # update the slot with the card that we recieved
+        *go
     )
 
     return State(
@@ -27,7 +29,7 @@ def S(s: State, a: Action, card: int):
         grid=grid_1
     )
 
-def V(s: State, ):
+def V(s: State) -> int:
     if s in cache:
         return cache[s]
 
@@ -55,3 +57,7 @@ def V(s: State, ):
         )
 
     return cache[s]
+
+V(INITIAL_STATE)
+
+print(cache[INITIAL_STATE])
