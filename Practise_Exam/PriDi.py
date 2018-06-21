@@ -9,9 +9,9 @@ from collections import namedtuple
 def inclusive_range(start, stop): 
     return range(start, stop + 1)
 
-#                        / high < n  = high
-# clamp(low, n, high) = |  n < low   = low
-#                       \  otherwise = n 
+#                        / high     if high < n 
+# clamp(low, n, high) = |  low      if n < low
+#                       \  n        otherwise
 def clamp(low, n, high): 
     return max(min(high, n), low)
 
@@ -60,7 +60,7 @@ def S(s: State, a: Action) -> State:
     round_1 = s.round + 1
 
     change_in_cooperability = ON_COOPERATE if a == COOPERATE else ON_DEFECT
-    
+
     cooperability_1 = s.cooperability + change_in_cooperability
 
     #                                          v ensures probability stays between 0 and 1

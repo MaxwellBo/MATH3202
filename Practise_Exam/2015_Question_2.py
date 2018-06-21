@@ -12,7 +12,7 @@ def inclusive_range(start, stop): return range(start, stop + 1)
 # DATA #
 ########
 
-# Each season is a new stage in our stochastic mo`d`el
+# Each season is a new stage in our stochastic model
 Seasons = "Summer Autumn Winter Spring Summer".split()
 T = range(len(Seasons))
 FIRST_SEASON = T[0]
@@ -21,7 +21,7 @@ LAST_SEASON = T[-1]
 # o_t Required operators in season t in T
 OperatorsRequired = [ 155, 120, 140, 100, 155 ]
 
-# u  Cost of employment above the level required ($)
+# u Cost of employment above the level required ($)
 COST_PER_USELESS_EMPLOYEE = 2000
 
 def cost_of_changing_level_of_employement(difference):
@@ -92,7 +92,7 @@ def optimal_value():
 
 def probe_optimal_path():
     def probe(s: State):
-        if s.season != LAST_SEASON + 1: # frontier blowout
+        if s.season != LAST_SEASON + 1: # frontier overflow
             (_, a) = V(s)
 
             print("In", Seasons[s.season], "hire", a.delta)
